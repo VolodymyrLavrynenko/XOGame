@@ -1,0 +1,1037 @@
+<HTML>
+
+<HEAD>
+	<meta name=vs_targetSchema content="HTML 4.0">
+	<meta name=vs_defaultClientScript content="JavaScript">
+	<TITLE>XOGame</TITLE>
+	<META NAME="GENERATOR" Content="Microsoft Visual Studio">
+	<META HTTP-EQUIV="Content-Type" content="text/html">
+</HEAD>
+
+<BODY>
+	<script language=javascript>
+
+		let fieldSize = 7;// 7 - 9 - 11
+		let FS = fieldSize;
+		let gameLevel = 1; // 0 - hight level, 1 - easy, 2 - medium, 3 - hard
+		let firstColorIndex = 0, secondColorIndex = 1, fieldMatrix = [], his = [];
+		let greenVar = 0, grayCellId;//
+		let newLevel = 0;
+		let gameColorIndex = -1, roboSwitch = 0, gameOver = 0, changeSize = 0;
+		let matrixCell = [];
+		const lightGreenColor = "#f0fff0", darkGreenColor = "#808080";
+		const pref = "v", idTab = "vartab", delayTime = 1500;
+
+		function cellId(n, x, y) {
+			return n + String(y).padStart(2, '0') + String(x).padStart(2, '0');
+		}
+
+		function cellIdL(n, x, y) {
+			return n + String(y).padStart(4, '0') + String(x).padStart(4, '0');
+		}
+
+		function index2Color(index) {
+			switch (index) {
+				case 0: return "#ffffff"; // white
+				case 1: return "#000000"; // black
+				case -1: return "#0000ff"; // blue
+				case -2: return "#ffff00"; // yellow
+				case 2: return "#e0e0e0"; // gray
+				default: return "#ffffff";
+			}
+		}
+
+		function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+		// ...existing code...
+		const date = new Date();
+		date.setFullYear(date.getFullYear() + 1); // +1 рік від поточної дати
+		const expires = date.toUTCString();
+		// ...existing code...
+
+		function getCookie(name) {
+			const value = `; ${document.cookie}`;
+			const parts = value.split(`; ${name}=`);
+			if (parts.length === 2) return parts.pop().split(';').shift();
+		}
+		//let username = getCookie("username");
+
+		function printCookie() {
+			document.getElementById("displ").innerHTML = document.cookie;
+			//hisCoo = JSON.parse(getCookie("his"));
+			//his = hisCoo || [];
+			//document.getElementById("histo").innerHTML = hisCoo;
+		}
+
+		function deleteCookie() {
+			document.cookie = "fieldSize=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+			document.cookie = "FS=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+			document.cookie = "level=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+			document.cookie = "firstColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+			document.cookie = "secondColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+			document.cookie = "his=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+			document.cookie = "fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+			document.cookie = "roboSwitch=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+			document.getElementById("displ").innerHTML = document.cookie;
+		}
+
+		//Bill function to count the number of lines
+		function bill(fieldSize) {
+			//alert(fieldMatrix);
+			let a = 0, b = 0;
+			for (let j = 0; j < fieldSize; j++) {
+				for (let k = 0; k < fieldSize; k++) {
+					const val = fieldMatrix[j * 2 + 1][k * 2 + 1];
+					if (!((j * 2 + 1) === 1 && (k * 2 + 1) === 1)) {
+						if (val === firstColorIndex) a++;// blue
+						if (val === secondColorIndex) b++;// yellow
+					}
+				}
+			}
+			displOne(a, b);
+			displText(a, b);
+			if (a + b < fieldSize * fieldSize - ((fieldSize - 1) / 2) * (((fieldSize - 1) / 2) - 1) * 2) {
+				document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+			} else {
+				document.cookie = `fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+			}
+
+		}
+
+		function displText(a, b) {
+			const fs = fieldSize;
+			const lon = fs * fs - ((fs - 1) / 2) * (((fs - 1) / 2) - 1) * 2;
+			let symbolClear = "&#9633"; // clear square
+			symbol = "&#9632"// black square
+			document.getElementById("dy").innerHTML = `<table border=0 cellSpacing=0 cellPadding=0>
+						<tr>
+							<td style="width: ${24.2 * FS}px; font-size: 25%; word-break: break-all;"><span style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span><span>${symbolClear.repeat(lon - a - b)}</span><span style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span></td>
+						</tr>
+						<tr>
+							<td style="width: ${24.2 * FS}px; font-size: 25%; word-break: break-all;"><span style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span><span>${symbolClear.repeat(lon - a - b)}</span><span style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span></td>
+						</tr>
+					</table>`;
+		}
+
+		function displOne(a, b) {
+			const fs = fieldSize;
+			const lon = fs * fs - ((fs - 1) / 2) * (((fs - 1) / 2) - 1) * 2;
+
+			// Відображення рахунку на панелі
+			//for (let i = 0; i < lon; i++) {
+			//	document.getElementById(cellIdL("e", i, 0)).bgColor =
+			//		i < a ? index2Color(firstColorIndex) : (i >= lon - b ? index2Color(secondColorIndex) : index2Color(2));
+			//	document.getElementById(cellIdL("f", i, 0)).bgColor =
+			//		i < b ? index2Color(secondColorIndex) : (i >= lon - a ? index2Color(firstColorIndex) : index2Color(2));
+			//}
+
+			// Формування рядка поточної партії
+			let dif = a - b, col = firstColorIndex, f = 0;
+			if (dif < 0) {
+				dif = -dif;
+				col = secondColorIndex;
+				f = 1;
+			}
+			if (firstColorIndex == -2) {
+				f = (f === 0) ? 1 : 0;
+			}
+			let allVal = 0;
+			let currentRow = "";
+			if (a + b == lon) {
+				gameOver = 1;
+				his.push([fieldSize, gameLevel, a, b]);
+				document.cookie = `his=${JSON.stringify(his)}; expires=${expires}; path=/`;
+				document.cookie = `roboSwitch=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+			} else {
+				currentRow = `<tr>
+					<td align = center>${fs}</td>
+					<td bgcolor=${index2Color(col)} align = center><font color="${index2Color(f)}">${gameLevel}</font></td>
+					<td align = center>${a}</td>
+					<td align = center bgcolor=${index2Color(col)}><font color="${index2Color(f)}">${dif}</font></td>
+					<td align = center>${b}</td>
+				</tr>`;
+				allVal = a - b;
+				//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+			}
+
+			// Формування історії
+			let hisRev = his.slice().reverse();
+			let g;
+			g = (f === 0) ? 1 : 0;
+			f = (firstColorIndex === -2) ? 1 : 0;
+			g = (secondColorIndex === -2) ? 1 : 0;
+			let txt = `<table border=0>
+        		<tr bgcolor="${index2Color(firstColorIndex)}"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        		<tr>
+					<th style="font-size: ${gameLevel * 100}%; color: ${index2Color(firstColorIndex)}"rowspan="${his.length * 2 + 3}" valign = "top">${gameLevel}</th>
+            		<th id="size">Size</th>
+            		<th id="level">Level</th>
+            		<th bgcolor="${index2Color(firstColorIndex)}"><font color="${index2Color(f)}">${lon}</font></th>
+           			<th id="all"></th>
+            		<th bgcolor="${index2Color(secondColorIndex)}" align="center">
+						<font color="${index2Color(g)}">${fs > 7 ? (fs - 2) * (fs - 2) - (((fs - 2) - 1) / 2) * ((((fs - 2) - 1) / 2) - 1) * 2 : 0}</font>
+					</th>
+        		</tr>
+        		<tr bgcolor="${index2Color(2)}"><td></td><td></td><td></td><td></td><td></td></tr>
+        		${currentRow}
+    		`;
+
+			for (const i of hisRev) {
+				let diff = i[2] - i[3], col = firstColorIndex, f = 0;
+				allVal += diff;
+				if (diff < 0) {
+					diff = -diff;
+					col = -2;
+					f = 1;
+				}
+				if (firstColorIndex == -2) {
+					f = (f === 0) ? 1 : 0;
+				}
+				txt += `<tr bgcolor="${index2Color(2)}"><td></td><td></td><td></td><td></td><td></td></tr>
+        		<tr>
+            		<td align="center">${i[0]}</td>
+            		<td bgcolor="${index2Color(col)}" align="center"><font color="${index2Color(f)}">${i[1]}</font></td>
+            		<td align="center">${i[2]}</td>
+            		<td bgcolor="${index2Color(col)}" align="center"><font color="${index2Color(f)}">${diff}</font></td>
+            		<td align="center">${i[3]}</td>
+        		</tr>`;
+			}
+			txt += `<tr bgcolor="${index2Color(2)}"><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>`;
+			document.getElementById("nt").innerHTML = txt;
+
+			// Відображення загального рахунку
+			let allValModule = Math.abs(allVal);
+			col = allVal < 0 ? secondColorIndex : firstColorIndex;
+			let fontK = 1;
+
+			// Автоматична зміна рівня/розміру
+			let m = 0;
+			if (fs > 7) m = (fs - 2) * (fs - 2) - (((fs - 2) - 1) / 2) * ((((fs - 2) - 1) / 2) - 1) * 2;
+			newLevel = 0;
+			if (fs > 7 && allVal < m) {
+				newLevel = (gameLevel > 1) ? -1 : 0;
+				//newLevel = -1;
+				document.getElementById("level").bgColor = index2Color(secondColorIndex);
+				document.getElementById("size").bgColor = index2Color(secondColorIndex);
+				f = (secondColorIndex === -2) ? 1 : 0;
+				document.getElementById("level").innerHTML = `<font color="${index2Color(f)}">${document.getElementById("level").innerText}</font>`;
+				document.getElementById("size").innerHTML = `<font color="${index2Color(f)}">${document.getElementById("size").innerText}</font>`;
+				fontK = 0.5;
+			} else
+				if (allVal > lon) {
+					//newLevel = 1;
+					newLevel = (gameLevel > 0) ? 1 : 0;
+					document.getElementById("level").bgColor = index2Color(firstColorIndex);
+					document.getElementById("size").bgColor = index2Color(firstColorIndex);
+					g = (firstColorIndex === -2) ? 1 : 0;
+					document.getElementById("level").innerHTML = `<font color="${index2Color(g)}">${document.getElementById("level").innerText}</font>`;
+					document.getElementById("size").innerHTML = `<font color="${index2Color(g)}">${document.getElementById("size").innerText}</font>`;
+					fontK = 3;
+				}
+
+			// Оновлення відображення all
+			f = (col == -1) ? 0 : 1;
+			const cell = document.getElementById("all");
+			//const cellSize = document.getElementById("size");
+			cell.innerHTML = `<font color="${index2Color(f)}">${allValModule}</font>`;
+			cell.bgColor = index2Color(col);
+			//cell.style.fontSize = `${fontK * parseInt(window.getComputedStyle(cellSize).fontSize, 10)}px`;
+			cell.style.fontSize = `${fontK * 100}%`;
+
+			changeSize = 0;
+		}
+
+		// Robot function to find and click on lines
+		function robot(query) {
+			const fs = fieldSize;
+			firstColorSet();
+			// 1. Вибір матриці для аналізу
+			let matrix = (query <= 0)
+				? (gameColorIndex !== firstColorIndex
+					? fieldMatrix.map(row => row.map(val => val === 1 ? 1 : 0))
+					: fieldMatrix.map(row => row.slice()))
+				: (gameColorIndex == firstColorIndex
+					? fieldMatrix.map(row => row.map(val => val === 1 ? 1 : 0))
+					: fieldMatrix.map(row => row.slice()));
+
+			// 2. Пошук можливих квадратів
+			//let mxsq = [];
+			//for (let y = 0; y < fs; y++) {
+			//	for (let x = 0; x < fs; x++) {
+			//		let xx = 2 * x + 1, yy = 2 * y + 1;
+			//		if (
+			//			matrix[yy - 1][xx - 1] === 1 && matrix[yy - 1][xx + 1] === 1 &&
+			//			matrix[yy + 1][xx - 1] === 1 && matrix[yy + 1][xx + 1] === 1 &&
+			//			matrix[yy][xx] === 0
+			//		) {
+			//			mxsq.push([yy, xx]);
+			//		}
+			//	}
+			//}
+
+			// 3. Пошук можливих ліній
+			let mxlnv = [], mxlnh = [];
+			for (let y = 1; y <= fs; y++) {
+				for (let x = 1; x < fs; x++) {
+					let xx = 2 * x, yy = 2 * y - 1, z = 0;
+					if (
+						matrix[yy][xx - 1] === 0 && matrix[yy][xx + 1] === 0 &&
+						matrix[yy - 1][xx] === 1 && matrix[yy + 1][xx] === 1 &&
+						matrix[yy][xx] === 0
+					) {
+						mxlnv.push([yy, xx, z]);
+					}
+				}
+			}
+			for (let y = 1; y < fs; y++) {
+				for (let x = 1; x <= fs; x++) {
+					let xx = 2 * x - 1, yy = 2 * y, z = 0;
+					if (
+						matrix[yy - 1][xx] === 0 && matrix[yy + 1][xx] === 0 &&
+						matrix[yy][xx - 1] === 1 && matrix[yy][xx + 1] === 1 &&
+						matrix[yy][xx] === 0
+					) {
+						mxlnh.push([yy, xx, z]);
+					}
+				}
+			}
+
+			// Оцінка ходів (rate)
+			const mxln = [...mxlnh, ...mxlnv];// Combine horizontal and vertical lines
+			for (const ln of mxlnv) {
+				let mxCopy = matrix.map(row => row.slice());
+				mxCopy[ln[0]][ln[1]] = 1;
+				sqare(mxCopy, ln, ln[0], ln[1] - 1); // left square
+				sqare(mxCopy, ln, ln[0], ln[1] + 1); // right square
+			}
+			for (const ln of mxlnh) {
+				let mxCopy = matrix.map(row => row.slice());
+				mxCopy[ln[0]][ln[1]] = 1;
+				sqare(mxCopy, ln, ln[0] - 1, ln[1]); // top square
+				sqare(mxCopy, ln, ln[0] + 1, ln[1]); // bottom square
+			}
+
+			// 5. Вибір ходу з мінімальним rate
+			if (mxln.length > 0) {
+				const ratemin = Math.min(...mxln.map(a => a[2]));// Find minimum rate
+				const filtered = (ratemin <= gameLevel * gameLevel || gameLevel === 0 || query === 1)// Filter lines based on game level**2
+					? mxln.filter(a => a[2] <= ratemin)
+					: mxln;
+				const min = 0, max = filtered.length - 1;// Random selection from filtered lines
+				const randomInt = Math.floor(Math.random() * (max - min + 1)) + min;// Random index
+
+				// 6. Виконання дії залежно від query
+				if (query == 0) {
+					clickk(cellId(pref, filtered[randomInt][1] + FS - fs, filtered[randomInt][0] + FS - fs));// click on random line
+					robot(10);
+				} else if (query == 1) {
+					fnBlick(filtered[randomInt][0] + FS - fs, filtered[randomInt][1] + FS - fs);
+				} else if (query == 2) {
+					if (ratemin == 0 && filtered.length > 5) {
+						clickk(cellId(pref, filtered[randomInt][1] + FS - fs, filtered[randomInt][0] + FS - fs));// click on random line
+						fnAutoBlick(query);
+					}
+				} else if (query == -2) {
+					clickk(cellId(pref, filtered[randomInt][1] + FS - fs, filtered[randomInt][0] + FS - fs));// click on random line
+					fnAutoBlick(query);
+				} else if (query == 10) {
+					fnReNew(filtered[randomInt][0] + FS - fs, filtered[randomInt][1] + FS - fs);
+				}
+				if ((query == 2 || query == -2) && ratemin == 0 && filtered.length <= 6) {
+					roboSwitch = 0;
+					roboColor('vartab');
+				}
+				if (query == -1) {
+					fnBlick(filtered[randomInt][0] + FS - fs, filtered[randomInt][1] + FS - fs);
+				}
+				if (query == 10) {
+					fnStatus(ratemin, filtered.length);
+				}
+			}
+			if (query != 10) {
+				robot(10);
+			}
+		}
+
+		// Status function to display the rate and number of available lines
+		function fnStatus(rateMin, filteredLength) {
+			let symbol = "&#9632"; // black square
+			let rateCount = rateMin;
+			if (rateMin == 0) { symbol = "&#9633"; rateCount = 1; }// white square
+			if (rateCount <= 20) {
+				document.getElementById("stat").innerHTML = `${symbol.repeat(rateCount)} : ${filteredLength}`;
+			} else {
+				document.getElementById("stat").innerHTML = ``;
+			}
+		}
+
+		async function fnAutoBlick(query) {
+			await delay(100);
+			robot(-query);
+		}
+
+		async function fnBlick(y, x) {
+			document.getElementById(cellId(pref, x, y)).bgColor = "#00ff00";// green
+			await delay(1000);
+			document.getElementById(cellId(pref, x, y)).bgColor = index2Color(2);// gray
+		}
+
+		async function fnReNew(y, x) {
+			await delay(100);
+		}
+
+		// Function to handle cell clicks
+		function lnCheckV(mx, ln, y, x) {
+			sqare(mx, ln, y, x - 1); // left square
+			sqare(mx, ln, y, x + 1); // right square
+		}
+
+		// Function to check if a square can be formed and update the matrix and line count
+		function lnCheckH(mx, ln, y, x) {
+			sqare(mx, ln, y - 1, x); // top square
+			sqare(mx, ln, y + 1, x); // bottom square
+		}
+
+		// Function to check if a square can be formed and update the matrix and line count
+		function sqare(mx, ln, ysq, xsq) {
+			if (
+				ysq > 0 && xsq > 0 &&
+				ysq < mx.length - 1 && xsq < mx[0].length - 1
+			) {
+				const sum =
+					Number(mx[ysq - 1][xsq]) +
+					Number(mx[ysq + 1][xsq]) +
+					Number(mx[ysq][xsq - 1]) +
+					Number(mx[ysq][xsq + 1]);
+				if (sum === 3) {
+					ln[2]++;
+					//if (Number(mx[ysq - 1][xsq]) === 0) {
+					//	mx[ysq - 1][xsq] = 1;
+					//	lnCheckH(mx, ln, ysq - 1, xsq);
+					//} else if (Number(mx[ysq + 1][xsq]) === 0) {
+					//	mx[ysq + 1][xsq] = 1;
+					//	lnCheckH(mx, ln, ysq + 1, xsq);
+					//} else if (Number(mx[ysq][xsq - 1]) === 0) {
+					//	mx[ysq][xsq - 1] = 1;
+					//	lnCheckV(mx, ln, ysq, xsq - 1);
+					//} else if (Number(mx[ysq][xsq + 1]) === 0) {
+					//	mx[ysq][xsq + 1] = 1;
+					//	lnCheckV(mx, ln, ysq, xsq + 1);
+					//}
+					if (Number(mx[ysq - 1][xsq]) === 0) {
+						mx[ysq - 1][xsq] = 1;
+						lnCheckH(mx, ln, ysq - 1, xsq);
+					}
+					if (Number(mx[ysq + 1][xsq]) === 0) {
+						mx[ysq + 1][xsq] = 1;
+						lnCheckH(mx, ln, ysq + 1, xsq);
+					}
+					if (Number(mx[ysq][xsq - 1]) === 0) {
+						mx[ysq][xsq - 1] = 1;
+						lnCheckV(mx, ln, ysq, xsq - 1);
+					}
+					if (Number(mx[ysq][xsq + 1]) === 0) {
+						mx[ysq][xsq + 1] = 1;
+						lnCheckV(mx, ln, ysq, xsq + 1);
+					}
+				}
+			}
+		}
+
+		//
+		function roboColor(idTab) {
+			const fs = FS;
+			roboSwitch = roboSwitch === 0 ? 1 : 0;
+			document.getElementById(cellId(pref, 2 * fs - 1, 2 * fs - 1)).bgColor =
+				roboSwitch === 1 ? index2Color(2) : index2Color(0);
+			document.cookie = `roboSwitch=${roboSwitch}; expires=${expires}; path=/`;
+		}
+
+		// 
+		async function autoSet(idTab, fieldSize) {
+			for (let j = 0; j < fieldSize; j++) {
+				for (let k = 0; k < fieldSize; k++) {
+					const y = j * 2 + 1, x = k * 2 + 1;
+					const arrCol = AroMatrix(y, x).map(a => Number(a == 1));
+					const sum = arrCol.reduce((a, b) => a + b, 0);
+					if (sum === 3) {
+						let cId = null;
+						for (const [yy, xx, value] of AroMatrixYXC(y, x)) {
+							if (value !== 1) {
+								cId = cellId(pref, xx + FS - fieldSize, yy + FS - fieldSize);
+								break;
+							}
+						}
+						//docment.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+						if (cId) {
+							await delay(100);
+							if (gameOver == 0) {
+								await clickk(cId);
+								await autoSet(idTab, fieldSize);
+							}
+							return;
+						}
+					}
+				}
+			}
+			await delay(800);
+			if (roboSwitch === 1) await robot(0);
+			if (gameOver == 0) {
+				bill(fieldSize);
+			}
+		}
+
+		// Function to get the neighbors of a cell in the matrix
+		function AroMatrix(y, x) {
+			return [
+				fieldMatrix[y - 1]?.[x] === 1,
+				fieldMatrix[y + 1]?.[x] === 1,
+				fieldMatrix[y]?.[x - 1] === 1,
+				fieldMatrix[y]?.[x + 1] === 1
+			];
+		}
+
+		// Function to get the neighbors of a cell in the matrix
+		function AroMatrixYXC(y, x) {
+			return [
+				[y - 1, x, fieldMatrix[y - 1]?.[x]],
+				[y + 1, x, fieldMatrix[y + 1]?.[x]],
+				[y, x - 1, fieldMatrix[y]?.[x - 1]],
+				[y, x + 1, fieldMatrix[y]?.[x + 1]]
+			];
+		}
+
+		// 
+		function lightGreen() {
+			for (let y = 1; y < fieldSize * 2; y += 2) {
+				for (let x = 1; x < fieldSize * 2; x += 2) {
+					if (
+						fieldMatrix[y][x] === 0 &&
+						x + y > fieldSize - 2 &&
+						x + y < 3 * fieldSize + 2 &&
+						-x + y < fieldSize + 2 &&
+						x - y < fieldSize + 2
+					) {
+						document.getElementById(cellId(pref, x + FS - fieldSize, y + FS - fieldSize)).bgColor =
+							greenVar === 1 ? lightGreenColor : index2Color(0);// white or light green
+					}
+				}
+			}
+		}
+
+		// 
+		function darkGreen() {
+			for (let y = 0; y < fieldSize * 2 + 1; y += 1) {
+				for (let x = 0; x < fieldSize * 2 + 1; x += 1) {
+					if (
+						fieldMatrix[y][x] === 1
+					) {
+						document.getElementById(cellId(pref, x + FS - fieldSize, y + FS - fieldSize)).bgColor =
+							greenVar === 1 ? darkGreenColor : index2Color(1);// black or dark green
+					}
+				}
+			}
+		}
+
+		// Function to pause the game
+		async function gamePause() {
+			greenVar = 1;
+			lightGreen();
+			darkGreen();
+			await delay(delayTime);
+			greenVar = 0;
+			lightGreen();
+			darkGreen();
+		}
+
+
+		function firstColorSet() {
+			//if (Number(getCookie("firstColorIndex")) <= 0) {
+			//	firstColorIndex = Number(parseInt(getCookie("firstColorIndex"), 10));
+			//	secondColorIndex = Number(parseInt(getCookie("secondColorIndex"), 10));
+			//}
+			firstColorIndex = Number(getCookie("firstColorIndex")) || firstColorIndex;
+			secondColorIndex = Number(getCookie("secondColorIndex")) || secondColorIndex;
+			if (firstColorIndex === 0) {
+				firstColorIndex = gameColorIndex;
+				secondColorIndex = (firstColorIndex === -1) ? -2 : -1;
+			}
+			//alert(`firstColorIndex=${firstColorIndex}, secondColorIndex=${secondColorIndex}`);
+			document.cookie = `firstColorIndex=${firstColorIndex}; expires=${expires}; path=/`;
+			document.cookie = `secondColorIndex=${secondColorIndex}; expires=${expires}; path=/`;
+		}
+
+		// Function to handle clicks on the game board
+		async function clickh(nam) {
+			let y = parseInt(nam.substr(1, 2), 10);
+			let x = parseInt(nam.substr(3, 2), 10);
+			let X = x - FS + fieldSize;
+			let Y = y - FS + fieldSize;
+			if (fieldMatrix[Y][X] == 2) {
+				if (greenVar === 0 && gameOver === 0) {
+					await clickk(nam);
+					//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+					if (roboSwitch === 1) gamePause();
+				}
+				changeSize = 1;
+			}
+		}
+		// Function to handle clicks on the game board 
+		function clickk(nam) {
+			const fs = fieldSize;
+			const Bor = document.getElementById(nam);
+			const ny = Number(nam.substr(1, 2));
+			const nx = Number(nam.substr(3, 2));
+			const nX = nx - FS + fieldSize;
+			const nY = ny - FS + fieldSize;
+
+			if (fieldMatrix[nY][nX] === 2) {
+				fieldMatrix[nY][nX] = 1;
+				Bor.bgColor = index2Color(1);
+
+				firstColorSet();
+				// ������� ����� ����� � ����� ��������� (rate)
+				const arrMatrix = nY % 2 === 1
+					? [[nY, nX - 1, 0], [nY, nX + 1, 0]]
+					: [[nY - 1, nX, 0], [nY + 1, nX, 0]];
+				// ���������� ����� �� ������������
+				let refill = 0;// ��������� ��� ��������������
+				for (const ln of arrMatrix) {// ln[0] - y, ln[1] - x
+					const y = ln[0], x = ln[1];// ���������� �����
+					const sum = AroMatrix(y, x).reduce((a, b) => a + Number(b), 0);// ���� �����
+					if (sum == 4) {// ���� �� ����� ���������
+						fieldMatrix[y][x] = gameColorIndex;// ���������� �����
+						refill = 1;// ��������� ��� ��������������
+						document.getElementById(cellId(pref, x + FS - fieldSize, y + FS - fieldSize)).bgColor = index2Color(gameColorIndex);// ������� ���� �����
+					}
+				}
+				// ����������, �� ������� ��������� �����
+				autoSet(idTab, fs);
+				if (refill === 0) { colsel(pref + "0101"); }
+			}
+			//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+			bill(fs);
+		}
+
+		// Function to toggle the color selection
+		function colsel(id) {
+			//firstColorSet();
+			//if (Number(getCookie("firstColorIndex")) <= 0) {
+			//	firstColorIndex = Number(parseInt(getCookie("firstColorIndex"), 10));
+			//	secondColorIndex = Number(parseInt(getCookie("secondColorIndex"), 10));
+			//}
+			firstColorIndex = Number(getCookie("firstColorIndex")) || firstColorIndex;
+			secondColorIndex = Number(getCookie("secondColorIndex")) || secondColorIndex;
+			if (firstColorIndex === 0) {
+				secondColorIndex = gameColorIndex;
+				firstColorIndex = (secondColorIndex === -1) ? -2 : -1;
+			}
+			gameColorIndex = (gameColorIndex === firstColorIndex) ? secondColorIndex : firstColorIndex; // toggle between blue and yellow
+			document.getElementById(id).bgColor = index2Color(gameColorIndex);
+			let f;
+			if (gameColorIndex == -1) {
+				f = 0;
+			} else {
+				f = 1;
+			}
+			document.getElementById(id).innerHTML = `<font color=${index2Color(f)}>${document.getElementById(id).innerText}</font>`;
+			document.cookie = 'firstColorIndex=' + firstColorIndex + '; expires=' + expires + '; path=/';
+			document.cookie = 'secondColorIndex=' + secondColorIndex + '; expires=' + expires + '; path=/';
+		}
+
+		function hasCookie(name) {
+			return document.cookie.split(';').some((item) => item.trim().startsWith(name + '='));
+		}
+
+		// Function to create the HTML structure for the game board
+		function createHtml(fs, FS) {
+			let html = [];
+			fieldMatrix = Array.from({ length: FS * 2 + 2 }, () => Array(FS * 2 + 1).fill(0));
+			if (hasCookie("fieldMatrix") && getCookie("fieldMatrix").length > 2) {
+				fieldMatrix = JSON.parse(getCookie("fieldMatrix"));
+			}
+			let dF = FS - fs
+			html.push('<TABLE border=0 cellSpacing=0 id="vartab">');
+			for (let y = 0; y < FS * 2 + 1; y++) {
+				html.push('<TR' + (y % 2 == 1 ? ' style="height:20px"' : '') + '>');
+				for (let x = 0; x < FS * 2 + 1; x++) {
+					X = x - dF; Y = y - dF;
+					let td = '<TD id="' + cellId(pref, x, y) + '" bgcolor="';
+					let ck = 0;
+					// Визначаємо колір клітинки
+					if (x == 2 * FS - 1 && y == 2 * FS - 1) { td += index2Color(roboSwitch === 1 ? 2 : 0); } //gray or white
+					else if (x == 1 && y == 1) { td += index2Color(-1); } // blue
+					else if (x % 2 == 1 && y % 2 == 1) { td += index2Color(x >= dF && y >= dF && x <= 2 * FS - dF && y <= 2 * FS - dF ? fieldMatrix[Y < 0 || Y > 2 * fs ? 0 : Y][X < 0 || X > 2 * fs ? 0 : X] : 0); } // white square
+					else if ((x % 2 == 0 && y % 2 == 0
+						&& X + Y >= fs - 3 && X + Y <= (3 * fs) + 3
+						&& ((-X + Y) <= (fs + 3)) && ((X - Y) <= (fs + 3))
+						&& Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2
+					) || (x >= dF && y >= dF
+						&& x <= 2 * FS - dF && y <= 2 * FS - dF
+						&& (fieldMatrix[Y < 0 || Y > 2 * fs ? 0 : Y][X < 0 || X > 2 * fs ? 0 : X] === 1))
+					) { td += index2Color(1); ck = 2; } // black lines & dots
+					else if ((false
+						|| (X + Y == fs - 2) || (-X + Y == fs + 2)
+						|| (X - Y == fs + 2) || (X + Y == (3 * fs + 2))
+						|| (X == fs && Y == 0) || (X == fs && Y == 2 * fs)
+						|| (X == 0 && Y == fs) || (X == 2 * fs && Y == fs)
+					) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2) { td += index2Color(1); }// black perimeter 
+					else { td += index2Color(2); ck = 1; }// gray # area
+					td += '"';
+					if (x % 2 == 1) td += ' width=20';
+					td += ' onclick="';
+					// Призначаємо події
+					if (x == 1 && y == 1) { td += "colsel('" + pref + "0101')"; } // blue
+					else if (x == 3 && y == 1) { td += "fnChanger(2)"; }//+
+					else if (x == 1 && y == 3) { td += "fnChanger(-2)"; }//-
+					else if (x == FS * 2 - 1 && y == FS * 2 - 3) { td += "fnLevel(1)"; } //+
+					else if (x == FS * 2 - 3 && y == FS * 2 - 1) { td += "fnLevel(-1)"; } //-
+					else if (x == 1 && y == FS * 2 - 1) { td += "fnNewGame()"; } //#
+					else if (x == 3 && y == FS * 2 - 1) { td += "fnAuto()"; } //>
+					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += "fnQuery()"; }
+					else if (x == (2 * FS - 1) && y == 1) { td += "robot(0)"; }
+					else if (x == 2 * FS - 1 && y == 2 * FS - 1) { td += "roboColor('vartab')"; }
+					else if (ck == 1 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { td += "clickh('" + cellId(pref, x, y) + "')"; }
+					else if (ck != 2 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { matrixCell.push(cellId(pref, x, y)); }
+					else if (x == FS * 2 - 3 && y == 1) { td += "fnWorm()"; } //W
+					else if (x == FS * 2 - 1 && y == 3) { td += "fnSnake()"; } //S
+					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += "deleteCookie()"; }//R
+					td += '"';
+					td += ' align="center" valign="middle">';
+					// Символи
+					if ((x == 1 && y == 1)) { td += `<font color=${index2Color(0)}>${fs}</font>`; }
+					else if (x == 3 && y == 1) { td += "+"; }
+					else if (x == 1 && y == 3) { td += "-"; }
+					else if (x == FS * 2 - 1 && y == FS * 2 - 3) { td += "+"; }
+					else if (x == FS * 2 - 3 && y == FS * 2 - 1) { td += "-"; }
+					else if (x == 3 && y == FS * 2 - 1) { td += '>' }
+					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += '?' }
+					else if (x == 1 && y == FS * 2 - 1) { td += '#' }
+					else if (x == FS * 2 - 3 && y == 1) { td += 'W'; }
+					else if (x == FS * 2 - 1 && y == 3) { td += 'S'; }
+					else if (x == FS * 2 - 1 && y == FS * 2 - 1) { td += gameLevel; }
+					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += 'R' }
+					td += '</TD>';
+					html.push(td);
+				}
+				html.push('</TR>');
+			}
+			html.push('</TABLE>');
+			return html.join('');
+		}
+
+		// Initial call to set up the game board
+		function writeHtml(fsi) {
+			//deleteCookie();
+			FS = Number(getCookie("FS")) || FS;
+			roboSwitch = Number(getCookie("roboSwitch")) || roboSwitch;
+			fieldSize = fsi;
+			fieldSize = Number(getCookie("fieldSize")) || fieldSize;
+			const fs = fieldSize;
+			gameLevel = Number(getCookie("level")) || gameLevel;
+			his = JSON.parse(getCookie("his") || JSON.stringify(his));
+			matrixCell = []; // Очищення
+
+			// Оновлення ігрового поля
+			document.getElementById("tc").innerHTML = createCoord(fs);
+			document.getElementById("tv").innerHTML = createCoordY(fs);
+			document.getElementById("tx").innerHTML = createHtml(fs, FS);
+
+			displText(0, 0);
+			grayCellId = cellId(pref, FS * 2 - 1, FS * 2 - 1);
+
+			// Створення fieldMatrix нового розміру
+			fieldMatrix = Array.from({ length: 2 * fs + 1 }, (_, y) =>
+				Array.from({ length: 2 * fs + 1 }, (_, x) => {
+					const col = document.getElementById(cellId(pref, x + FS - fieldSize, y + FS - fieldSize)).bgColor;
+					return col === index2Color(1) ? 1 : col === index2Color(2) ? 2 : col === index2Color(-1) ? -1 : col === index2Color(-2) ? -2 : 0;
+				})
+			);
+
+			// Делегування подій для кліків (опціонально)
+			//document.getElementById("vartab").onclick = function (e) {
+			//	if (e.target.tagName === "TD") handleCellClick(e.target);
+			//};
+
+			// Додаємо обробники кліків для кожної клітинки
+			matrixCell.forEach(id => {
+				const cell = document.getElementById(id);
+				//cell.addEventListener('click', function (e) {
+				// Замість addEventListener можна використовувати onclick, щоб не накопичувати події:
+				cell.onclick = function (e) {
+					const rect = this.getBoundingClientRect();
+					const x = e.clientX - rect.left;
+					const y = e.clientY - rect.top;
+					const w = rect.width, h = rect.height;
+
+					// Діагоналі: y = x (головна), y = h - x (побічна)
+					if (y < x && y < h - x) { clickh(getNeighborCellId(id, -1, 0)); } // up
+					else if (y < x && y >= h - x) { clickh(getNeighborCellId(id, 0, 1)); } // right
+					else if (y >= x && y < h - x) { clickh(getNeighborCellId(id, 0, -1)); } // left
+					else if (y >= x && y >= h - x) { clickh(getNeighborCellId(id, 1, 0)); }// down
+				};
+			});
+			if (his.length > 0) { firstColorSet(); }
+			robot(0);
+			bill(fs);
+			//grayCellId.bgColor = roboSwitch == 1 ? index2Color(2) : index2Color(0);
+		}
+
+		// Function to create the display area for the game
+		function createDisplOne(fs) {
+			const dimen = fs * fs - ((fs - 1) / 2) * (((fs - 1) / 2) - 1) * 2;
+			const html = [];
+			html.push(`<TABLE WIDTH="${24.3 * FS}" HEIGHT="12" BORDER="0" CELLSPACING="1" CELLPADDING="1" bgcolor="#ffffff" id="displt">`);
+			html.push('<TR>');
+			for (let i = 0; i < dimen; i++) {
+				html.push(`<TD id="${cellIdL("e", i, 0)}" bgcolor="${index2Color(2)}"></TD>`);
+			}
+			html.push('<TR>');
+			html.push('</TR>');
+			for (let i = 0; i < dimen; i++) {
+				html.push(`<TD id="${cellIdL("f", i, 0)}" bgcolor="${index2Color(2)}"></TD>`);
+			}
+			html.push('</TR></TABLE>');
+			return html.join('');
+		}
+
+		// Event listener to call writeHtml when the document is loaded
+		document.addEventListener('DOMContentLoaded', function () { writeHtml(fieldSize); });
+
+		// Helper function to generate cell IDs
+		function getNeighborCellId(cellId, dy, dx) {
+			let y = parseInt(cellId.substr(1, 2), 10);
+			let x = parseInt(cellId.substr(3, 2), 10);
+			let Y = y - FS + fieldSize;
+			let X = x - FS + fieldSize;
+			if (fieldMatrix[Y + dy][X + dx] === 1) {
+				if (fieldMatrix[Y - dy][X - dx] === 1) {
+					[dx, dy] = [dy, dx];// swap
+				} else if (fieldMatrix[Y + dy][X - dx] === 1) {
+					dy = -dy;
+				} else if (fieldMatrix[Y - dy][X + dx] === 1) {
+					dx = -dx;
+				}
+			}
+			let newY = (y + dy).toString().padStart(2, '0');
+			let newX = (x + dx).toString().padStart(2, '0');
+			return pref + newY + newX;
+		}
+
+		function changeLevel() { gameLevel = Number(document.getElementById("flevel").value); }
+
+		let x = 0, y = 0, colorX = [], coord = [], i = 0, dx = 0, dy = 0, wLength = 7, wormColor = "#0033ff";
+
+		async function fnWorm() {
+			colorX[i] = document.getElementById(cellId(pref, x + 0, y + 0)).bgColor;
+			coord[i] = cellId(pref, x, y);
+			document.getElementById(coord[i]).bgColor = document.getElementById("v0101").bgColor;
+			if (i > wLength + 1) { document.getElementById(coord[i - 2 - wLength]).bgColor = colorX[i - 2 - wLength]; }
+			if (x < fieldSize * 2 && y == 0) {
+				dx = 1; dy = 0;
+			} else if (y < fieldSize * 2 && x == fieldSize * 2) {
+				dx = 0; dy = 1;
+			} else if (y == fieldSize * 2 && x > 0) {
+				dx = -1; dy = 0;
+			} else { dx = 0; dy = -1; }
+			x = x + dx; y = y + dy; i++;
+			if (i % 2 == 0) { await delay(200); }
+			fnWorm();
+		}
+
+		let cYX = [];
+
+		async function fnSnake() {
+			colorX[i] = document.getElementById(cellId(pref, x + 0, y + 0)).bgColor;
+			coord[i] = cellId(pref, x, y);
+			cYX.push([y, x]);
+			document.getElementById(coord[i]).bgColor = document.getElementById("v0101").bgColor;
+			if (i > wLength + 1) { document.getElementById(coord[i - 2 - wLength]).bgColor = colorX[i - 2 - wLength]; }
+			let step = [];
+
+			if (i == 0) { step.push([0, 1]) }
+			if (i > 0) {
+				let cYXlast = cYX.slice(-wLength);
+				let st, cm = [];
+				let yn = y - 1, xn = x;
+				st = 0;
+				if (yn >= 0 && (cYX[i - 1][0] != yn || cYX[i - 1][1] != xn) && !(yn % 2 != 0 && xn % 2 != 0)) {
+					for (cm of cYXlast) {
+						if (cm[0] == yn - 1 && cm[1] == xn) {
+							st = 1;
+						}
+					}
+					if (st == 0) {
+						step.push([yn, xn]);
+					}
+				}
+				yn = y + 1, xn = x;
+				st = 0;
+				if (yn <= 2 * fieldSize && (cYX[i - 1][0] != yn || cYX[i - 1][1] != xn) && !(yn % 2 != 0 && xn % 2 != 0)) {
+					for (cm of cYXlast) {
+						if (cm[0] == yn + 1 && cm[1] == xn) {
+							st = 1;
+						}
+					}
+					if (st == 0) {
+						step.push([yn, xn]);
+					}
+				}
+				yn = y, xn = x - 1;
+				st = 0;
+				if (xn >= 0 && (cYX[i - 1][0] != yn || cYX[i - 1][1] != xn) && !(yn % 2 != 0 && xn % 2 != 0)) {
+					for (cm of cYXlast) {
+						if (cm[0] == yn && cm[1] == xn - 1) {
+							st = 1;
+						}
+					}
+					if (st == 0) {
+						step.push([yn, xn]);
+					}
+				}
+				yn = y, xn = x + 1;
+				st = 0;
+				if (xn <= 2 * fieldSize && (cYX[i - 1][0] != yn || cYX[i - 1][1] != xn) && !(yn % 2 != 0 && xn % 2 != 0)) {
+					for (cm of cYXlast) {
+						if (cm[0] == yn && cm[1] == xn + 1) {
+							st = 1;
+						}
+					}
+					if (st == 0) {
+						step.push([yn, xn]);
+					}
+				}
+			}
+			if (step.length == 0) {
+				y = 0;
+				x = 0;
+			}
+			if (step.length > 0) {
+				const randomInt = Math.floor(Math.random() * (step.length - 0 + 0)) + 0;
+				y = step[randomInt][0];
+				x = step[randomInt][1];
+			}
+			i++;
+			await delay(300);
+			fnSnake();
+		}
+
+		function fnQuery() { robot(1); }// Call the robot function with query = 1
+
+		function fnAuto() {
+			if (gameOver == 1) { fnNewGame(); }
+			robot(2);
+		}
+
+		async function fnChanger(delta) {
+			if (changeSize == 0) {
+				fieldSize = fieldSize + delta;
+				if (delta > 0 && FS < fieldSize) { FS = fieldSize; }
+				document.cookie = `fieldSize=${fieldSize}; expires=" + expires + "; path=/`;
+				document.cookie = `FS=${FS > fieldSize ? FS : fieldSize}; expires=" + expires + "; path=/`;
+				writeHtml(fieldSize);
+			}
+		}
+
+		function fnLevel(delta) {
+			if (gameLevel > 0 || delta > 0) {
+				gameLevel = gameLevel + delta;
+				document.getElementById(cellId("v", FS * 2 - 1, FS * 2 - 1)).innerText = gameLevel;
+				document.cookie = `level=${gameLevel}; expires=" + expires + "; path=/`;
+			}
+		}
+
+		function fnNewGame() {
+			let id = cellId("v", "01", "01");
+			if (changeSize == 0) {
+				gameOver = 0;
+				gameColorIndex = firstColorIndex;
+				document.getElementById(id).bgColor = index2Color(gameColorIndex);
+				let f = 0;
+				if (gameColorIndex == secondColorIndex) {
+					f = 1;
+				}
+				document.getElementById(id).innerHTML = `<font color=${index2Color(f)}>${document.getElementById(id).innerText}</font>`;
+				greenVar = 0;
+				roboSwitch = 0;
+				if (newLevel > 0) {
+					fnChanger(2);
+					fnLevel(1);
+					newLevel = 0;
+				} else if (newLevel < 0) {
+					fnChanger(-2);
+					fnLevel(-1);
+					newLevel = 0;
+				} else {
+					writeHtml(fieldSize);
+				}
+			}
+		}
+
+		function createCoord(fs) {
+			let html = [];
+			html.push('<TABLE border=0 cellSpacing=0 id="coordtab">');
+			html.push('<TR>');
+			for (let x = 0; x < FS * 2 + 1; x++) {
+				html.push(`<TD style="width:${x % 2 == 1 ? 20 : 0}px; font-size: 25%; height: "20px" align="center" valign="down">`);
+				if (x % 2 == 1) { html.push(`${x / 2 + 0.5}`); }
+				html.push('</TD>');
+			}
+			html.push('</TR>');
+			html.push('</TABLE>');
+			return html.join('');
+		}
+
+		function createCoordY(fs) {
+			let html = [];
+			html.push('<TABLE border=0 cellSpacing=0 id="coordtab">');
+			for (let x = 0; x < FS * 2 + 1; x++) {
+				html.push(`<TR><TD style="height:${x % 2 == 1 ? 20 : 0}px; font-size: 25%; height: "20px" align="right" valign="middle">`);
+				if (x % 2 == 1) { html.push(`${x / 2 + 0.5}`); }
+				html.push('</TD></TR>');
+			}
+			html.push('</TABLE>');
+			return html.join('');
+		}
+
+	</script>
+
+	<!-- Insert HTML here -->
+	<table border=0 cellSpacing=0 cellPadding=0>
+		<tr>
+			<td></td>
+			<td>
+				<div id="tc"></div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div id="tv"></div>
+			</td>
+			<td>
+				<div id="tx"></div>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>
+				<div id="dy"></div>
+			</td>
+		</tr>
+	</table>
+
+	<div id="dx"></div>
+	<!--<INPUT type="text" ID=redCell value="">-->
+	<small>
+		<DIV id="redTxt"></div>
+	</small>
+	<div id="nt"></div>
+	<small>
+		<div id="stat"></div>
+	</small>
+	<div id="ex"></div>
+	<div id="displ"></div>
+	<div id="histo"></div>
+</BODY>
+
+</HTML>
