@@ -734,6 +734,7 @@
 			document.getElementById("tc").innerHTML = createCoord(fs);
 			document.getElementById("tv").innerHTML = createCoordY(fs);
 			document.getElementById("tx").innerHTML = createHtml(fs, FS);
+			document.getElementById("texting").innerHTML = 'Try pressing " > " to get started.<br>The goal is to get more squares of your color to move to a higher level and board size.<hr>Click on the gray square to toggle the robot on/off.<br>White square in the upper right corner - robot progress.<br>? - hint<br>';
 
 			displText(0, 0);
 			grayCellId = cellId(pref, FS * 2 - 1, FS * 2 - 1);
@@ -998,7 +999,7 @@
 	<table border=0 cellSpacing=0 cellPadding=0>
 		<tr>
 			<td></td>
-			<td style="width: 300px;" id="column1">
+			<td id="column1">
 				<div id="tc"></div>
 			</td>
 		</tr>
@@ -1009,14 +1010,7 @@
 			<td>
 				<div id="tx"></div>
 			</td>
-			<td valign="top">
-				Try pressing ">" to get started.<br>
-				The goal is to get more squares of your color to move
-				to a higher level and board size.
-				<hr>
-				Click on the gray square to toggle the robot on/off.<br>
-				White square in the upper right corner - robot
-				progress.<br>? - hint<br>
+			<td valign="top" id="column2">
 			</td>
 		</tr>
 		<tr>
@@ -1032,10 +1026,19 @@
 	<small>
 		<DIV id="redTxt"></div>
 	</small>
-	<div id="nt"></div>
-	<small>
-		<div id="stat"></div>
-	</small>
+	<table border=0 cellSpacing=0 cellPadding=1>
+		<tr>
+			<td valign="top" id="column3">
+				<div id="nt"></div>
+				<small>
+					<div id="stat"></div>
+				</small>
+			</td>
+			<td valign="top" width="150px">
+				<div id="texting"></div>
+			</td>
+		</tr>
+	</table>
 	<div id="ex"></div>
 	<div id="displ"></div>
 	<div id="histo"></div>
