@@ -781,6 +781,7 @@
 			let symbol = "&#9632"; // black square
 			document.getElementById("texting").innerHTML = `<span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
 			document.getElementById("texting").innerHTML += `<br><span style="color: ${index2Color(secondColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'robot' : 'second gamer'} color`;
+			document.getElementById("texting").innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}; font-weight: bold;">${gameLevel}</span> is game level`;
 			document.getElementById("texting").innerHTML += '<br>Try pressing " > " to get started.'
 			document.getElementById("texting").innerHTML += '<br>The goal is to get more squares of your color to move to a higher level and board size.';
 			document.getElementById("texting").innerHTML += '<hr>Click on the gray square to toggle the robot on/off.';
