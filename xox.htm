@@ -20,7 +20,10 @@
 		let gameColorIndex = -1, roboSwitch = 0, gameOver = 0, changeSize = 0;
 		let matrixCell = [];
 		const lightGreenColor = "#f0fff0", darkGreenColor = "#808080";
-		const pref = "v", idTab = "vartab", delayTime = 1500;
+		const pref = "v", idTab = "vartab", delayTime = 1500, linesWidth = 20;
+		const date = new Date();
+		date.setFullYear(date.getFullYear() + 1); // +1 рік від поточної дати
+		const expires = date.toUTCString();
 
 		function cellId(n, x, y) {
 			return n + String(y).padStart(2, '0') + String(x).padStart(2, '0');
@@ -42,12 +45,6 @@
 		}
 
 		function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
-
-		// ...existing code...
-		const date = new Date();
-		date.setFullYear(date.getFullYear() + 1); // +1 рік від поточної дати
-		const expires = date.toUTCString();
-		// ...existing code...
 
 		function getCookie(name) {
 			const value = `; ${document.cookie}`;
@@ -653,7 +650,7 @@
 			let dF = FS - fs
 			html.push('<TABLE border=0 cellSpacing=0 id="vartab">');
 			for (let y = 0; y < FS * 2 + 1; y++) {
-				html.push('<TR' + (y % 2 == 1 ? ' style="height:20px"' : '') + '>');
+				html.push('<TR' + (y % 2 == 1 ? ' style="height:' + linesWidth + 'px"' : '') + '>');
 				for (let x = 0; x < FS * 2 + 1; x++) {
 					X = x - dF; Y = y - dF;
 					let td = '<TD id="' + cellId(pref, x, y) + '" bgcolor="';
@@ -678,7 +675,7 @@
 					) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2) { td += index2Color(1); }// black perimeter 
 					else { td += index2Color(2); ck = 1; }// gray # area
 					td += '"';
-					if (x % 2 == 1) td += ' width=20';
+					if (x % 2 == 1) td += ' width="' + linesWidth + 'px"';
 					td += ' onclick="';
 					// Призначаємо події
 					if (x == 1 && y == 1) { td += "colsel('" + pref + "0101')"; } // blue
@@ -973,7 +970,7 @@
 			html.push('<TABLE border=0 cellSpacing=0 id="coordtab">');
 			html.push('<TR>');
 			for (let x = 0; x < FS * 2 + 1; x++) {
-				html.push(`<TD style="width:${x % 2 == 1 ? 20 : 0}px; font-size: 25%; height: "20px" align="center" valign="down">`);
+				html.push(`<TD style="width:${x % 2 == 1 ? linesWidth : 0}px; font-size: 25%; height: "${linesWidth}px" align="center" valign="down">`);
 				if (x % 2 == 1) { html.push(`${x / 2 + 0.5}`); }
 				html.push('</TD>');
 			}
@@ -986,7 +983,7 @@
 			let html = [];
 			html.push('<TABLE border=0 cellSpacing=0 id="coordtab">');
 			for (let x = 0; x < FS * 2 + 1; x++) {
-				html.push(`<TR><TD style="height:${x % 2 == 1 ? 20 : 0}px; font-size: 25%; height: "20px" align="right" valign="middle">`);
+				html.push(`<TR><TD style="height:${x % 2 == 1 ? linesWidth : 0}px; font-size: 25%; height: "${linesWidth}px" align="right" valign="middle">`);
 				if (x % 2 == 1) { html.push(`${x / 2 + 0.5}`); }
 				html.push('</TD></TR>');
 			}
@@ -1010,6 +1007,15 @@
 			</td>
 			<td>
 				<div id="tx"></div>
+			</td>
+			<td valign="top">
+				Try pressing ">" to get started.<br>
+				The goal is to get more squares of your color to move
+				to a higher level and board size.
+				<hr>
+				Click on the gray square to toggle the robot on/off.<br>
+				White square in the upper right corner - robot
+				progress<br>? - hint<br>
 			</td>
 		</tr>
 		<tr>
