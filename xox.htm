@@ -437,11 +437,12 @@
 
 		//
 		function roboColor(idTab) {
-			const fs = FS;
+			//const fs = FS;
 			roboSwitch = roboSwitch === 0 ? 1 : 0;
-			document.getElementById(cellId(pref, 2 * fs - 1, 2 * fs - 1)).bgColor =
+			document.getElementById(cellId(pref, 2 * FS - 1, 2 * FS - 1)).bgColor =
 				roboSwitch === 1 ? index2Color(2) : index2Color(0);
 			document.cookie = `roboSwitch=${roboSwitch}; expires=${expires}; path=/`;
+			writeText();
 		}
 
 		// 
@@ -553,7 +554,6 @@
 				firstColorIndex = gameColorIndex;
 				secondColorIndex = (firstColorIndex === -1) ? -2 : -1;
 			}
-			//alert(`firstColorIndex=${firstColorIndex}, secondColorIndex=${secondColorIndex}`);
 			document.cookie = `firstColorIndex=${firstColorIndex}; expires=${expires}; path=/`;
 			document.cookie = `secondColorIndex=${secondColorIndex}; expires=${expires}; path=/`;
 		}
@@ -634,6 +634,8 @@
 			document.getElementById(id).innerHTML = `<font color=${index2Color(f)}>${document.getElementById(id).innerText}</font>`;
 			document.cookie = 'firstColorIndex=' + firstColorIndex + '; expires=' + expires + '; path=/';
 			document.cookie = 'secondColorIndex=' + secondColorIndex + '; expires=' + expires + '; path=/';
+			//alert(`You are playing for ${gameColorIndex == -1 ? 'Blue' : 'Yellow'}`);
+			//writeText();
 		}
 
 		function hasCookie(name) {
@@ -734,7 +736,6 @@
 			document.getElementById("tc").innerHTML = createCoord(fs);
 			document.getElementById("tv").innerHTML = createCoordY(fs);
 			document.getElementById("tx").innerHTML = createHtml(fs, FS);
-			document.getElementById("texting").innerHTML = 'Try pressing " > " to get started.<br>The goal is to get more squares of your color to move to a higher level and board size.<hr>Click on the gray square to toggle the robot on/off.<br>White square in the upper right corner - robot progress.<br>? - hint<br>';
 
 			displText(0, 0);
 			grayCellId = cellId(pref, FS * 2 - 1, FS * 2 - 1);
@@ -773,9 +774,19 @@
 			if (his.length > 0) { firstColorSet(); }
 			robot(0);
 			bill(fs);
+			writeText()
 			//grayCellId.bgColor = roboSwitch == 1 ? index2Color(2) : index2Color(0);
 		}
-
+		function writeText() {
+			let symbol = "&#9632"; // black square
+			document.getElementById("texting").innerHTML = `<span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
+			document.getElementById("texting").innerHTML += `<br><span style="color: ${index2Color(secondColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'robot' : 'second gamer'} color`;
+			document.getElementById("texting").innerHTML += '<br>Try pressing " > " to get started.'
+			document.getElementById("texting").innerHTML += '<br>The goal is to get more squares of your color to move to a higher level and board size.';
+			document.getElementById("texting").innerHTML += '<hr>Click on the gray square to toggle the robot on/off.';
+			document.getElementById("texting").innerHTML += '<br>White square in the upper right corner - robot progress.';
+			document.getElementById("texting").innerHTML += '<br>? - hint<br>';
+		}
 		// Function to create the display area for the game
 		function createDisplOne(fs) {
 			const dimen = fs * fs - ((fs - 1) / 2) * (((fs - 1) / 2) - 1) * 2;
@@ -996,6 +1007,8 @@
 	</script>
 
 	<!-- Insert HTML here -->
+	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
+			style="font-weight: normal;">Game</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0>
 		<tr>
 			<td></td>
