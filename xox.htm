@@ -728,6 +728,7 @@
 			gameLevel = Number(getCookie("level")) || gameLevel;
 			his = JSON.parse(getCookie("his") || JSON.stringify(his));
 			matrixCell = []; // Очищення
+			document.getElementById("column1").style.width = `${24 * FS + 20}px`;
 
 			// Оновлення ігрового поля
 			document.getElementById("tc").innerHTML = createCoord(fs);
@@ -997,7 +998,7 @@
 	<table border=0 cellSpacing=0 cellPadding=0>
 		<tr>
 			<td></td>
-			<td style="width: 25 * FS px;">
+			<td style="width: 300px;" id="column1">
 				<div id="tc"></div>
 			</td>
 		</tr>
