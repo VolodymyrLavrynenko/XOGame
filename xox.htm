@@ -570,7 +570,7 @@
 			if (fieldMatrix[Y][X] == 2) {
 				if (greenVar === 0 && gameOver === 0) {
 					await clickk(nam);
-					//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+					document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
 					if (roboSwitch === 1) gamePause();
 				}
 				changeSize = 1;
