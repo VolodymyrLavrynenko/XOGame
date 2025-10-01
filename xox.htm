@@ -545,7 +545,6 @@
 			darkGreen();
 		}
 
-
 		function firstColorSet() {
 			//if (Number(getCookie("firstColorIndex")) <= 0) {
 			//	firstColorIndex = Number(parseInt(getCookie("firstColorIndex"), 10));
@@ -609,7 +608,7 @@
 				autoSet(idTab, fs);
 				if (refill === 0) { colsel(pref + "0101"); }
 			}
-			document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+			//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
 			bill(fs);
 		}
 
@@ -646,11 +645,16 @@
 		}
 
 		// Function to create the HTML structure for the game board
-		function createHtml(fs, FS) {
+		function createHtml(fs, FS, change) {
 			let html = [];
 			fieldMatrix = Array.from({ length: FS * 2 + 2 }, () => Array(FS * 2 + 1).fill(0));
-			if (hasCookie("fieldMatrix") && getCookie("fieldMatrix").length > 2) {
-				fieldMatrix = JSON.parse(getCookie("fieldMatrix"));
+			if (change == 0 && hasCookie("fieldMatrix") && getCookie("fieldMatrix").length > 20) {
+				//fieldMatrix = JSON.parse(getCookie("fieldMatrix"));
+				//alert(JSON.parse(getCookie("fieldMatrix")));
+				// ...existing code...
+				// Копіювання значень з matrix2 у matrix1
+				fieldMatrix = JSON.parse(getCookie("fieldMatrix")).map(row => row.slice());
+				// ...existing code...
 			}
 			let dF = FS - fs
 			html.push('<TABLE border=0 cellSpacing=0 id="vartab">');
@@ -723,22 +727,24 @@
 		}
 
 		// Initial call to set up the game board
-		function writeHtml(fsi) {
+		function writeHtml(change) {
 			//deleteCookie();
+			//alert(`fsi=${fsi}`);
 			FS = Number(getCookie("FS")) || FS;
 			roboSwitch = Number(getCookie("roboSwitch")) || roboSwitch;
-			fieldSize = fsi;
+			//fieldSize = fsi;
 			fieldSize = Number(getCookie("fieldSize")) || fieldSize;
 			const fs = fieldSize;
 			gameLevel = Number(getCookie("level")) || gameLevel;
 			his = JSON.parse(getCookie("his") || JSON.stringify(his));
 			matrixCell = []; // Очищення
 			document.getElementById("column1").style.width = `${24 * FS + 20}px`;
+			//alert(`FS=${FS}, fieldSize=${fieldSize}, fs=${fs}`);
 
 			// Оновлення ігрового поля
 			document.getElementById("tc").innerHTML = createCoord(fs);
 			document.getElementById("tv").innerHTML = createCoordY(fs);
-			document.getElementById("tx").innerHTML = createHtml(fs, FS);
+			document.getElementById("tx").innerHTML = createHtml(fs, FS, change);
 
 			displText(0, 0);
 			grayCellId = cellId(pref, FS * 2 - 1, FS * 2 - 1);
@@ -810,7 +816,7 @@
 		}
 
 		// Event listener to call writeHtml when the document is loaded
-		document.addEventListener('DOMContentLoaded', function () { writeHtml(fieldSize); });
+		document.addEventListener('DOMContentLoaded', function () { writeHtml(0); });
 
 		// Helper function to generate cell IDs
 		function getNeighborCellId(cellId, dy, dx) {
@@ -944,8 +950,10 @@
 				fieldSize = fieldSize + delta;
 				if (delta > 0 && FS < fieldSize) { FS = fieldSize; }
 				document.cookie = `fieldSize=${fieldSize}; expires=" + expires + "; path=/`;
-				document.cookie = `FS=${FS > fieldSize ? FS : fieldSize}; expires=" + expires + "; path=/`;
-				writeHtml(fieldSize);
+				//document.cookie = `FS=${FS > fieldSize ? FS : fieldSize}; expires=" + expires + "; path=/`;
+				document.cookie = `FS=${FS}; expires=" + expires + "; path=/`;
+				document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+				writeHtml(1);
 			}
 		}
 
@@ -979,7 +987,7 @@
 					fnLevel(-1);
 					newLevel = 0;
 				} else {
-					writeHtml(fieldSize);
+					writeHtml(0);
 				}
 			}
 		}
