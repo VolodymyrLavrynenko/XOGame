@@ -6,9 +6,7 @@
 	<TITLE>XOGame</TITLE>
 	<META NAME="GENERATOR" Content="Microsoft Visual Studio">
 	<META HTTP-EQUIV="Content-Type" content="text/html">
-	<!-- ...existing code... -->
 	<link rel="icon" type="image/png" href="xox.png">
-	<!-- ...existing code... -->
 </HEAD>
 
 <BODY>
@@ -64,6 +62,8 @@
 		}
 
 		function deleteCookie() {
+			localStorage.clear();
+			//localStorage.removeItem('fieldMatrix');
 			document.cookie = "fieldSize=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
 			document.cookie = "FS=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
 			document.cookie = "level=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
@@ -73,6 +73,7 @@
 			document.cookie = "fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
 			document.cookie = "roboSwitch=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
 			document.getElementById("displ").innerHTML = document.cookie;
+
 		}
 
 		//Bill function to count the number of lines
@@ -92,6 +93,7 @@
 			displText(a, b);
 			if (a + b < fieldSize * fieldSize - ((fieldSize - 1) / 2) * (((fieldSize - 1) / 2) - 1) * 2) {
 				document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+				writeMatrix();
 			} else {
 				document.cookie = `fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
 			}
@@ -551,13 +553,17 @@
 			//	secondColorIndex = Number(parseInt(getCookie("secondColorIndex"), 10));
 			//}
 			firstColorIndex = Number(getCookie("firstColorIndex")) || firstColorIndex;
+
 			secondColorIndex = Number(getCookie("secondColorIndex")) || secondColorIndex;
+
 			if (firstColorIndex === 0) {
 				firstColorIndex = gameColorIndex;
 				secondColorIndex = (firstColorIndex === -1) ? -2 : -1;
 			}
 			document.cookie = `firstColorIndex=${firstColorIndex}; expires=${expires}; path=/`;
+			//saveValue('firstColorIndex', firstColorIndex);
 			document.cookie = `secondColorIndex=${secondColorIndex}; expires=${expires}; path=/`;
+			//saveValue('secondColorIndex', secondColorIndex);
 		}
 
 		// Function to handle clicks on the game board
@@ -636,12 +642,33 @@
 			document.getElementById(id).innerHTML = `<font color=${index2Color(f)}>${document.getElementById(id).innerText}</font>`;
 			document.cookie = 'firstColorIndex=' + firstColorIndex + '; expires=' + expires + '; path=/';
 			document.cookie = 'secondColorIndex=' + secondColorIndex + '; expires=' + expires + '; path=/';
-			//alert(`You are playing for ${gameColorIndex == -1 ? 'Blue' : 'Yellow'}`);
-			//writeText();
+			//saveValue('firstColorIndex', firstColorIndex);
+			//saveValue('secondColorIndex', secondColorIndex);
 		}
 
 		function hasCookie(name) {
 			return document.cookie.split(';').some((item) => item.trim().startsWith(name + '='));
+		}
+
+		function saveValue(name, value) {
+			localStorage.setItem(name, value);
+		}
+
+		function getValue(name, defaultValue) {
+			const value = localStorage.getItem(name);
+			return value !== null ? value : defaultValue;
+		}
+
+		function writeMatrix() {
+			//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+			// Зберегти матрицю
+			localStorage.setItem('fieldMatrix', JSON.stringify(fieldMatrix));
+		}
+
+		function readMatrix() {
+			// Отримати матрицю
+			//alert(JSON.parse(localStorage.getItem('fieldMatrix')));
+			fieldMatrix = JSON.parse(localStorage.getItem('fieldMatrix') || '[]');
 		}
 
 		// Function to create the HTML structure for the game board
@@ -649,12 +676,11 @@
 			let html = [];
 			fieldMatrix = Array.from({ length: FS * 2 + 2 }, () => Array(FS * 2 + 1).fill(0));
 			if (change == 0 && hasCookie("fieldMatrix") && getCookie("fieldMatrix").length > 20) {
+				//if (change == 0 && localStorage.getItem('fieldMatrix') !== null) {
 				//fieldMatrix = JSON.parse(getCookie("fieldMatrix"));
-				//alert(JSON.parse(getCookie("fieldMatrix")));
-				// ...existing code...
 				// Копіювання значень з matrix2 у matrix1
-				fieldMatrix = JSON.parse(getCookie("fieldMatrix")).map(row => row.slice());
-				// ...existing code...
+				//fieldMatrix = JSON.parse(getCookie("fieldMatrix")).map(row => row.slice());
+				readMatrix();
 			}
 			let dF = FS - fs
 			html.push('<TABLE border=0 cellSpacing=0 id="vartab">');
@@ -700,6 +726,7 @@
 					else if (ck == 1 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { td += "clickh('" + cellId(pref, x, y) + "')"; }
 					else if (ck != 2 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { matrixCell.push(cellId(pref, x, y)); }
 					else if (x == FS * 2 - 3 && y == 1) { td += "fnWorm()"; } //W
+					//else if (x == FS * 2 - 3 && y == 1) { td += "readMatrix()"; } //W
 					else if (x == FS * 2 - 1 && y == 3) { td += "fnSnake()"; } //S
 					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += "deleteCookie()"; }//R
 					td += '"';
@@ -953,6 +980,7 @@
 				//document.cookie = `FS=${FS > fieldSize ? FS : fieldSize}; expires=" + expires + "; path=/`;
 				document.cookie = `FS=${FS}; expires=" + expires + "; path=/`;
 				document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+				writeMatrix();
 				writeHtml(1);
 			}
 		}
