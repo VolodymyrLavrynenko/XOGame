@@ -64,14 +64,14 @@
 		function deleteCookie() {
 			localStorage.clear();
 			//localStorage.removeItem('fieldMatrix');
-			document.cookie = "fieldSize=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-			document.cookie = "FS=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-			document.cookie = "level=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-			document.cookie = "firstColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-			document.cookie = "secondColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-			document.cookie = "his=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+			document.cookie = "fieldSize=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			document.cookie = "FS=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			document.cookie = "level=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			document.cookie = "firstColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			document.cookie = "secondColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			document.cookie = "his=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
 			document.cookie = "fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			document.cookie = "roboSwitch=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+			document.cookie = "roboSwitch=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
 			document.getElementById("displ").innerHTML = document.cookie;
 
 		}
@@ -142,8 +142,10 @@
 			if (a + b == lon) {
 				gameOver = 1;
 				his.push([fieldSize, gameLevel, a, b]);
-				document.cookie = `his=${JSON.stringify(his)}; expires=${expires}; path=/`;
-				document.cookie = `roboSwitch=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+				//document.cookie = `his=${JSON.stringify(his)}; expires=${expires}; path=/`;
+				saveHis();
+				//document.cookie = `roboSwitch=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+				localStorage.removeItem('roboSwitch');
 			} else {
 				currentRow = `<tr>
 					<td align = center>${fs}</td>
@@ -446,7 +448,8 @@
 			roboSwitch = roboSwitch === 0 ? 1 : 0;
 			document.getElementById(cellId(pref, 2 * FS - 1, 2 * FS - 1)).bgColor =
 				roboSwitch === 1 ? index2Color(2) : index2Color(0);
-			document.cookie = `roboSwitch=${roboSwitch}; expires=${expires}; path=/`;
+			//document.cookie = `roboSwitch=${roboSwitch}; expires=${expires}; path=/`;
+			saveValue('roboSwitch', roboSwitch);
 			writeText();
 		}
 
@@ -552,18 +555,20 @@
 			//	firstColorIndex = Number(parseInt(getCookie("firstColorIndex"), 10));
 			//	secondColorIndex = Number(parseInt(getCookie("secondColorIndex"), 10));
 			//}
-			firstColorIndex = Number(getCookie("firstColorIndex")) || firstColorIndex;
+			//firstColorIndex = Number(getCookie("firstColorIndex")) || firstColorIndex;
+			firstColorIndex = Number(getValue('firstColorIndex', firstColorIndex));
 
-			secondColorIndex = Number(getCookie("secondColorIndex")) || secondColorIndex;
+			//secondColorIndex = Number(getCookie("secondColorIndex")) || secondColorIndex;
+			secondColorIndex = Number(getValue('secondColorIndex', secondColorIndex));
 
 			if (firstColorIndex === 0) {
 				firstColorIndex = gameColorIndex;
 				secondColorIndex = (firstColorIndex === -1) ? -2 : -1;
 			}
-			document.cookie = `firstColorIndex=${firstColorIndex}; expires=${expires}; path=/`;
-			//saveValue('firstColorIndex', firstColorIndex);
-			document.cookie = `secondColorIndex=${secondColorIndex}; expires=${expires}; path=/`;
-			//saveValue('secondColorIndex', secondColorIndex);
+			//document.cookie = `firstColorIndex=${firstColorIndex}; expires=${expires}; path=/`;
+			saveValue('firstColorIndex', firstColorIndex);
+			//document.cookie = `secondColorIndex=${secondColorIndex}; expires=${expires}; path=/`;
+			saveValue('secondColorIndex', secondColorIndex);
 		}
 
 		// Function to handle clicks on the game board
@@ -625,8 +630,10 @@
 			//	firstColorIndex = Number(parseInt(getCookie("firstColorIndex"), 10));
 			//	secondColorIndex = Number(parseInt(getCookie("secondColorIndex"), 10));
 			//}
-			firstColorIndex = Number(getCookie("firstColorIndex")) || firstColorIndex;
-			secondColorIndex = Number(getCookie("secondColorIndex")) || secondColorIndex;
+			//firstColorIndex = Number(getCookie("firstColorIndex")) || firstColorIndex;
+			firstColorIndex = Number(getValue('firstColorIndex', firstColorIndex));
+			//secondColorIndex = Number(getCookie("secondColorIndex")) || secondColorIndex;
+			secondColorIndex = Number(getValue('secondColorIndex', secondColorIndex));
 			if (firstColorIndex === 0) {
 				secondColorIndex = gameColorIndex;
 				firstColorIndex = (secondColorIndex === -1) ? -2 : -1;
@@ -640,10 +647,10 @@
 				f = 1;
 			}
 			document.getElementById(id).innerHTML = `<font color=${index2Color(f)}>${document.getElementById(id).innerText}</font>`;
-			document.cookie = 'firstColorIndex=' + firstColorIndex + '; expires=' + expires + '; path=/';
-			document.cookie = 'secondColorIndex=' + secondColorIndex + '; expires=' + expires + '; path=/';
-			//saveValue('firstColorIndex', firstColorIndex);
-			//saveValue('secondColorIndex', secondColorIndex);
+			//document.cookie = 'firstColorIndex=' + firstColorIndex + '; expires=' + expires + '; path=/';
+			//document.cookie = 'secondColorIndex=' + secondColorIndex + '; expires=' + expires + '; path=/';
+			saveValue('firstColorIndex', firstColorIndex);
+			saveValue('secondColorIndex', secondColorIndex);
 		}
 
 		function hasCookie(name) {
@@ -669,6 +676,15 @@
 			// Отримати матрицю
 			//alert(JSON.parse(localStorage.getItem('fieldMatrix')));
 			fieldMatrix = JSON.parse(localStorage.getItem('fieldMatrix') || '[]');
+		}
+
+		function saveHis() {
+			localStorage.setItem('his', JSON.stringify(his));
+		}
+
+		function getHis() {
+			// Отримати матрицю
+			his = JSON.parse(localStorage.getItem('his') || JSON.stringify(his));
 		}
 
 		// Function to create the HTML structure for the game board
@@ -757,13 +773,18 @@
 		function writeHtml(change) {
 			//deleteCookie();
 			//alert(`fsi=${fsi}`);
-			FS = Number(getCookie("FS")) || FS;
-			roboSwitch = Number(getCookie("roboSwitch")) || roboSwitch;
+			//FS = Number(getCookie("FS")) || FS;
+			FS = Number(getValue("FS", 7));
+			//roboSwitch = Number(getCookie("roboSwitch")) || roboSwitch;
+			roboSwitch = Number(getValue("roboSwitch", roboSwitch));
 			//fieldSize = fsi;
-			fieldSize = Number(getCookie("fieldSize")) || fieldSize;
+			//fieldSize = Number(getCookie("fieldSize")) || fieldSize;
+			fieldSize = Number(getValue("fieldSize", 7));
 			const fs = fieldSize;
-			gameLevel = Number(getCookie("level")) || gameLevel;
-			his = JSON.parse(getCookie("his") || JSON.stringify(his));
+			//gameLevel = Number(getCookie("level")) || gameLevel;
+			gameLevel = Number(getValue('level', gameLevel));
+			//his = JSON.parse(getCookie("his") || JSON.stringify(his));
+			getHis();
 			matrixCell = []; // Очищення
 			document.getElementById("column1").style.width = `${24 * FS + 20}px`;
 			//alert(`FS=${FS}, fieldSize=${fieldSize}, fs=${fs}`);
@@ -976,9 +997,11 @@
 			if (changeSize == 0) {
 				fieldSize = fieldSize + delta;
 				if (delta > 0 && FS < fieldSize) { FS = fieldSize; }
-				document.cookie = `fieldSize=${fieldSize}; expires=" + expires + "; path=/`;
+				//document.cookie = `fieldSize=${fieldSize}; expires=" + expires + "; path=/`;
+				saveValue("fieldSize", fieldSize);
 				//document.cookie = `FS=${FS > fieldSize ? FS : fieldSize}; expires=" + expires + "; path=/`;
-				document.cookie = `FS=${FS}; expires=" + expires + "; path=/`;
+				//document.cookie = `FS=${FS}; expires=" + expires + "; path=/`;
+				saveValue("FS", FS);
 				//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
 				writeMatrix();
 				writeHtml(1);
@@ -989,7 +1012,8 @@
 			if (gameLevel > 0 || delta > 0) {
 				gameLevel = gameLevel + delta;
 				document.getElementById(cellId("v", FS * 2 - 1, FS * 2 - 1)).innerText = gameLevel;
-				document.cookie = `level=${gameLevel}; expires=" + expires + "; path=/`;
+				//document.cookie = `level=${gameLevel}; expires=" + expires + "; path=/`;
+				saveValue("level", gameLevel);
 			}
 		}
 
