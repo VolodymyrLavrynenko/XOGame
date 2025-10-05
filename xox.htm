@@ -70,7 +70,7 @@
 			document.cookie = "firstColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
 			document.cookie = "secondColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
 			document.cookie = "his=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-			document.cookie = "fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+			document.cookie = "fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
 			document.cookie = "roboSwitch=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
 			document.getElementById("displ").innerHTML = document.cookie;
 
@@ -78,7 +78,6 @@
 
 		//Bill function to count the number of lines
 		function bill(fieldSize) {
-			//alert(fieldMatrix);
 			let a = 0, b = 0;
 			for (let j = 0; j < fieldSize; j++) {
 				for (let k = 0; k < fieldSize; k++) {
@@ -92,10 +91,11 @@
 			displOne(a, b);
 			displText(a, b);
 			if (a + b < fieldSize * fieldSize - ((fieldSize - 1) / 2) * (((fieldSize - 1) / 2) - 1) * 2) {
-				document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+				//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
 				writeMatrix();
 			} else {
-				document.cookie = `fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+				//document.cookie = `fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+				localStorage.removeItem('fieldMatrix');
 			}
 
 		}
@@ -675,8 +675,8 @@
 		function createHtml(fs, FS, change) {
 			let html = [];
 			fieldMatrix = Array.from({ length: FS * 2 + 2 }, () => Array(FS * 2 + 1).fill(0));
-			if (change == 0 && hasCookie("fieldMatrix") && getCookie("fieldMatrix").length > 20) {
-				//if (change == 0 && localStorage.getItem('fieldMatrix') !== null) {
+			//if (change == 0 && hasCookie("fieldMatrix") && getCookie("fieldMatrix").length > 20) {
+			if (change == 0 && localStorage.getItem('fieldMatrix') !== null) {
 				//fieldMatrix = JSON.parse(getCookie("fieldMatrix"));
 				// Копіювання значень з matrix2 у matrix1
 				//fieldMatrix = JSON.parse(getCookie("fieldMatrix")).map(row => row.slice());
@@ -979,7 +979,7 @@
 				document.cookie = `fieldSize=${fieldSize}; expires=" + expires + "; path=/`;
 				//document.cookie = `FS=${FS > fieldSize ? FS : fieldSize}; expires=" + expires + "; path=/`;
 				document.cookie = `FS=${FS}; expires=" + expires + "; path=/`;
-				document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
+				//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
 				writeMatrix();
 				writeHtml(1);
 			}
