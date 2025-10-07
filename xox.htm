@@ -789,7 +789,8 @@
 			//deleteCookie();
 			//alert(`fsi=${fsi}`);
 			//FS = Number(getCookie("FS")) || FS;
-			tableWidth = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight * 0.9;
+			//tableWidth = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight * 0.9;
+			tableWidth = Math.min(window.innerWidth, window.innerHeight) * 0.9;
 			FS = Number(getValue("FS", 7));
 			//roboSwitch = Number(getCookie("roboSwitch")) || roboSwitch;
 			roboSwitch = Number(getValue("roboSwitch", roboSwitch));
@@ -1115,9 +1116,42 @@
 
 		}*/
 	</style>
+	<style>
+		/* Скидання стилів для всієї сторінки */
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-size: 16px;
+			/* Базовий розмір шрифту */
+			font-family: Arial, sans-serif;
+			/* Ваш шрифт */
+			background: #fff;
+		}
+
+		/* Скидання для заголовків */
+		h1,
+		h2,
+		h3,
+		h4,
+		h5,
+		h6 {
+			margin: 0;
+			padding: 0;
+			font-weight: normal;
+		}
+
+		/* Скидання для таблиць */
+		table {
+			border-collapse: collapse;
+			margin: 0;
+			padding: 0;
+		}
+	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">2</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">3</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0>
 		<tr>
 			<td></td>
