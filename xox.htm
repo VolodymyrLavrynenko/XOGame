@@ -21,10 +21,14 @@
 		let gameColorIndex = -1, roboSwitch = 0, gameOver = 0, changeSize = 0;
 		let matrixCell = [];
 		const lightGreenColor = "#f0fff0", darkGreenColor = "#808080";
-		const pref = "v", idTab = "vartab", delayTime = 1500, linesWidth = 20;
+		const pref = "v", idTab = "vartab", delayTime = 1500;
 		const date = new Date();
 		date.setFullYear(date.getFullYear() + 1); // +1 рік від поточної дати
 		const expires = date.toUTCString();
+		const width = window.innerWidth;
+		let linesWidth = 20;
+		let tableWidth = 1000;
+		//linesWidth = width / 10;
 
 		function cellId(n, x, y) {
 			return n + String(y).padStart(2, '0') + String(x).padStart(2, '0');
@@ -690,6 +694,8 @@
 		// Function to create the HTML structure for the game board
 		function createHtml(fs, FS, change) {
 			let html = [];
+			let cellWidth;
+			let cellHeight;
 			fieldMatrix = Array.from({ length: FS * 2 + 2 }, () => Array(FS * 2 + 1).fill(0));
 			//if (change == 0 && hasCookie("fieldMatrix") && getCookie("fieldMatrix").length > 20) {
 			if (change == 0 && localStorage.getItem('fieldMatrix') !== null) {
@@ -699,12 +705,15 @@
 				readMatrix();
 			}
 			let dF = FS - fs
-			html.push('<TABLE border=0 cellSpacing=0 id="vartab">');
+			//html.push(`<TABLE border=0 cellSpacing=0 id="vartab" style="table-layout: fixed; border-collapse: collapse; width: ${tableWidth}px; height: ${tableWidth}px; font-size: ${Math.floor(tableWidth / (FS * 2 + 1))}px;">`);
+			html.push(`<TABLE border=0 cellSpacing=0 id="vartab" style="table-layout: fixed; border-collapse: collapse; width: ${tableWidth}px; height: ${tableWidth}px;">`);
 			for (let y = 0; y < FS * 2 + 1; y++) {
-				html.push('<TR' + (y % 2 == 1 ? ' style="height:' + linesWidth + 'px"' : '') + '>');
+				//html.push('<TR' + (y % 2 == 1 ? ' style="height:' + linesWidth + 'px"' : ' style="height:' + 6 + 'px"') + '>');
+				html.push(`<TR style="height:${y % 2 == 1 ? linesWidth : linesWidth / 10}px;">`);
 				for (let x = 0; x < FS * 2 + 1; x++) {
 					X = x - dF; Y = y - dF;
-					let td = '<TD id="' + cellId(pref, x, y) + '" bgcolor="';
+					//let td = `<TD style="height:${y % 2 == 1 ? linesWidth : linesWidth / 10}px;" id="${cellId(pref, x, y)}" bgcolor="`;
+					let td = `<TD id="${cellId(pref, x, y)}" bgcolor="`;
 					let ck = 0;
 					// Визначаємо колір клітинки
 					if (x == 2 * FS - 1 && y == 2 * FS - 1) { td += index2Color(roboSwitch === 1 ? 2 : 0); } //gray or white
@@ -726,7 +735,11 @@
 					) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2) { td += index2Color(1); }// black perimeter 
 					else { td += index2Color(2); ck = 1; }// gray # area
 					td += '"';
-					if (x % 2 == 1) td += ' width="' + linesWidth + 'px"';
+					//if (x % 2 == 1) td += ' width="' + linesWidth + 'px"';
+					//td += (x % 2 == 1 ? ' style="width:' + linesWidth + 'px"' : ' style="width:' + 4 + 'px"');
+					cellWidth = (x % 2 == 1 ? linesWidth : linesWidth / 10);
+					cellHeight = (y % 2 == 1 ? linesWidth : linesWidth / 10);
+					td += ` style="width:${cellWidth}px; height:${cellHeight}px; max-height:${cellHeight}px; min-height:${cellHeight}px; padding:0px; margin:0px; border:0px; font-size:${tableWidth / (1.5 * FS)}px; line-height:${cellHeight}px; overflow:hidden; vertical-align:middle; white-space: nowrap;"`;
 					td += ' onclick="';
 					// Призначаємо події
 					if (x == 1 && y == 1) { td += "colsel('" + pref + "0101')"; } // blue
@@ -749,6 +762,7 @@
 					td += ' align="center" valign="middle">';
 					// Символи
 					if ((x == 1 && y == 1)) { td += `<font color=${index2Color(0)}>${fs}</font>`; }
+					//else if (x == 3 && y == 1) { td += `<span style="font-size:${linesWidth * 3.0}px;">+</span>`; }
 					else if (x == 3 && y == 1) { td += "+"; }
 					else if (x == 1 && y == 3) { td += "-"; }
 					else if (x == FS * 2 - 1 && y == FS * 2 - 3) { td += "+"; }
@@ -774,6 +788,7 @@
 			//deleteCookie();
 			//alert(`fsi=${fsi}`);
 			//FS = Number(getCookie("FS")) || FS;
+			tableWidth = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight * 0.9;
 			FS = Number(getValue("FS", 7));
 			//roboSwitch = Number(getCookie("roboSwitch")) || roboSwitch;
 			roboSwitch = Number(getValue("roboSwitch", roboSwitch));
@@ -790,7 +805,7 @@
 			//alert(`FS=${FS}, fieldSize=${fieldSize}, fs=${fs}`);
 
 			// Оновлення ігрового поля
-			document.getElementById("tc").innerHTML = createCoord(fs);
+			document.getElementById("tc").innerHTML = createCoordX(fs);
 			document.getElementById("tv").innerHTML = createCoordY(fs);
 			document.getElementById("tx").innerHTML = createHtml(fs, FS, change);
 
@@ -833,7 +848,10 @@
 			bill(fs);
 			writeText()
 			//grayCellId.bgColor = roboSwitch == 1 ? index2Color(2) : index2Color(0);
+			//alert(width);
+
 		}
+
 		function writeText() {
 			let symbol = "&#9632"; // black square
 			document.getElementById("texting").innerHTML = `<span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
@@ -1044,12 +1062,12 @@
 			}
 		}
 
-		function createCoord(fs) {
+		function createCoordX(fs) {
 			let html = [];
-			html.push('<TABLE border=0 cellSpacing=0 id="coordtab">');
+			html.push('<TABLE border=0 cellSpacing=0 id="coordtabX">');
 			html.push('<TR>');
 			for (let x = 0; x < FS * 2 + 1; x++) {
-				html.push(`<TD style="width:${x % 2 == 1 ? linesWidth : 0}px; font-size: 25%; height: "${linesWidth}px" align="center" valign="down">`);
+				html.push(`<TD style="width:${x % 2 == 1 ? 10 * linesWidth : 0}px; font-size: ${tableWidth / (6.0 * FS)}; height: "${linesWidth}px" align="center" valign="down">`);
 				if (x % 2 == 1) { html.push(`${x / 2 + 0.5}`); }
 				html.push('</TD>');
 			}
@@ -1060,9 +1078,9 @@
 
 		function createCoordY(fs) {
 			let html = [];
-			html.push('<TABLE border=0 cellSpacing=0 id="coordtab">');
+			html.push(`<TABLE border=0 cellSpacing=0 id="coordtabY" height="${tableWidth}px">`);
 			for (let x = 0; x < FS * 2 + 1; x++) {
-				html.push(`<TR><TD style="height:${x % 2 == 1 ? linesWidth : 0}px; font-size: 25%; height: "${linesWidth}px" align="right" valign="middle">`);
+				html.push(`<TR><TD style="height:${x % 2 == 1 ? linesWidth : 0}px; font-size: ${tableWidth / (6.0 * FS)}; width: "${linesWidth}px" align="right" valign="middle">`);
 				if (x % 2 == 1) { html.push(`${x / 2 + 0.5}`); }
 				html.push('</TD></TR>');
 			}
@@ -1072,6 +1090,30 @@
 
 	</script>
 
+	<!--<style>
+		#vartab {
+			width: 90vw;
+			/* 90% ширини вікна */
+			max-width: 100vw;
+			/* не більше ширини вікна */
+			height: auto;
+		}
+	</style>-->
+	<!-- ...existing code... -->
+	<style>
+		/*#vartab {
+			table-layout: fixed;
+			width: 600px;
+			height: 600px;
+		}*/
+
+		/*#vartab td {
+			padding: 0;
+			margin: 0;
+			border: none;
+
+		}*/
+	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
 			style="font-weight: normal;">Game</span></h1>
