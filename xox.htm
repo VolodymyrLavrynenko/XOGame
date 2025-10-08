@@ -112,10 +112,10 @@
 			symbol = "&#9632"// black square
 			document.getElementById("dy").innerHTML = `<table border=0 cellSpacing=0 cellPadding=0>
 						<tr>
-							<td style="width: ${24.2 * FS}px; font-size: 25%; word-break: break-all;"><span style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span><span>${symbolClear.repeat(lon - a - b)}</span><span style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span></td>
+							<td style="width: ${tableWidth}px; font-size: ${tableWidth / (fieldSize * 4)}; word-break: break-all;"><span style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span><span>${symbolClear.repeat(lon - a - b)}</span><span style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span></td>
 						</tr>
 						<tr>
-							<td style="width: ${24.2 * FS}px; font-size: 25%; word-break: break-all;"><span style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span><span>${symbolClear.repeat(lon - a - b)}</span><span style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span></td>
+							<td style="width: ${tableWidth}px; font-size: ${tableWidth / (fieldSize * 4)}; word-break: break-all;"><span style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span><span>${symbolClear.repeat(lon - a - b)}</span><span style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span></td>
 						</tr>
 					</table>`;
 		}
@@ -790,7 +790,7 @@
 			//alert(`fsi=${fsi}`);
 			//FS = Number(getCookie("FS")) || FS;
 			//tableWidth = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight * 0.9;
-			tableWidth = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+			tableWidth = Math.min(window.innerWidth, window.innerHeight) * 0.8;
 			FS = Number(getValue("FS", 7));
 			//roboSwitch = Number(getCookie("roboSwitch")) || roboSwitch;
 			roboSwitch = Number(getValue("roboSwitch", roboSwitch));
@@ -1151,7 +1151,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">4</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">5</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0>
 		<tr>
 			<td></td>
