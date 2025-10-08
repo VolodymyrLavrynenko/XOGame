@@ -30,6 +30,7 @@
 		let linesWidth = 20;
 		let tableWidth = 1000;
 		//linesWidth = width / 10;
+		let orientation = (window.innerWidth > window.innerHeight) ? "landscape" : "portrait";
 
 		function cellId(n, x, y) {
 			return n + String(y).padStart(2, '0') + String(x).padStart(2, '0');
@@ -69,15 +70,15 @@
 		function deleteCookie() {
 			localStorage.clear();
 			//localStorage.removeItem('fieldMatrix');
-			document.cookie = "fieldSize=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			document.cookie = "FS=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			document.cookie = "level=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			document.cookie = "firstColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			document.cookie = "secondColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			document.cookie = "his=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			document.cookie = "fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			document.cookie = "roboSwitch=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			document.getElementById("displ").innerHTML = document.cookie;
+			//document.cookie = "fieldSize=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			//document.cookie = "FS=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			//document.cookie = "level=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			//document.cookie = "firstColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			//document.cookie = "secondColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			//document.cookie = "his=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			//document.cookie = "fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			//document.cookie = "roboSwitch=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
+			//document.getElementById("displ").innerHTML = document.cookie;
 
 		}
 
@@ -109,8 +110,9 @@
 			const fs = fieldSize;
 			const lon = fs * fs - ((fs - 1) / 2) * (((fs - 1) / 2) - 1) * 2;
 			let symbolClear = "&#9633"; // clear square
-			symbol = "&#9632"// black square
-			document.getElementById("dy").innerHTML = `<table border=0 cellSpacing=0 cellPadding=0>
+			symbol = "&#9632"// bflack square
+			let dyId = orientation === "landscape" ? "dyL" : "dy";
+			document.getElementById(dyId).innerHTML = `<table border=0 cellSpacing=0 cellPadding=0>
 						<tr>
 							<td style="width: ${tableWidth}px; font-size: ${tableWidth / (fieldSize * 4)}; word-break: break-all;"><span style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span><span>${symbolClear.repeat(lon - a - b)}</span><span style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span></td>
 						</tr>
@@ -206,7 +208,8 @@
         		</tr>`;
 			}
 			txt += `<tr bgcolor="${index2Color(2)}"><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>`;
-			document.getElementById("nt").innerHTML = txt;
+			let ntId = orientation === "landscape" ? "ntL" : "nt";
+			document.getElementById(ntId).innerHTML = txt;
 
 			// Відображення загального рахунку
 			let allValModule = Math.abs(allVal);
@@ -365,12 +368,13 @@
 		// Status function to display the rate and number of available lines
 		function fnStatus(rateMin, filteredLength) {
 			let symbol = "&#9632"; // black square
+			let statId = orientation === "landscape" ? "statL" : "stat";
 			let rateCount = rateMin;
 			if (rateMin == 0) { symbol = "&#9633"; rateCount = 1; }// white square
 			if (rateCount <= 20) {
-				document.getElementById("stat").innerHTML = `${symbol.repeat(rateCount)} : ${filteredLength}`;
+				document.getElementById(statId).innerHTML = `${symbol.repeat(rateCount)} : ${filteredLength}`;
 			} else {
-				document.getElementById("stat").innerHTML = ``;
+				document.getElementById(statId).innerHTML = ``;
 			}
 		}
 
@@ -790,7 +794,7 @@
 			//alert(`fsi=${fsi}`);
 			//FS = Number(getCookie("FS")) || FS;
 			//tableWidth = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight * 0.9;
-			tableWidth = Math.min(window.innerWidth, window.innerHeight) * 0.8;
+			tableWidth = Math.min(window.innerWidth, window.innerHeight) * 0.9;
 			FS = Number(getValue("FS", 7));
 			//roboSwitch = Number(getCookie("roboSwitch")) || roboSwitch;
 			roboSwitch = Number(getValue("roboSwitch", roboSwitch));
@@ -856,14 +860,16 @@
 
 		function writeText() {
 			let symbol = "&#9632"; // black square
-			document.getElementById("texting").innerHTML = `<span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
-			document.getElementById("texting").innerHTML += `<br><span style="color: ${index2Color(secondColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'robot' : 'second gamer'} color`;
-			document.getElementById("texting").innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}; font-weight: bold;">${gameLevel}</span> is game level`;
-			document.getElementById("texting").innerHTML += '<br>Try pressing " > " to get started. The first moves will be automatic.';
-			document.getElementById("texting").innerHTML += '<br>The goal is to get more squares of your color to move to a higher level and board size.';
-			document.getElementById("texting").innerHTML += '<hr>Click on the gray square to toggle the robot on/off.';
-			document.getElementById("texting").innerHTML += '<br>White square in the upper right corner - robot progress.';
-			document.getElementById("texting").innerHTML += '<br>? - hint<br>';
+			let textingId;
+			textingId = orientation == "landscape" ? "textingL" : "texting";
+			document.getElementById(textingId).innerHTML = `<span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
+			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(secondColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'robot' : 'second gamer'} color`;
+			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}; font-weight: bold;">${gameLevel}</span> is game level`;
+			document.getElementById(textingId).innerHTML += '<br>Try pressing " > " to get started. The first moves will be automatic.';
+			document.getElementById(textingId).innerHTML += '<br>The goal is to get more squares of your color to move to a higher level and board size.';
+			document.getElementById(textingId).innerHTML += '<hr>Click on the gray square to toggle the robot on/off.';
+			document.getElementById(textingId).innerHTML += '<br>White square in the upper right corner - robot progress.';
+			document.getElementById(textingId).innerHTML += '<br>? - hint<br>';
 		}
 		// Function to create the display area for the game
 		function createDisplOne(fs) {
@@ -1151,12 +1157,28 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">5</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">6</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0>
 		<tr>
 			<td></td>
 			<td id="column1">
 				<div id="tc"></div>
+			</td>
+			<td rowspan="3" align="left" valign="top">
+				<div id="dyL"></div>
+				<table border=0 cellSpacing=0 cellPadding=1>
+					<tr>
+						<td valign="top" id="column3L">
+							<div id="ntL"></div>
+							<small>
+								<div id="statL"></div>
+							</small>
+						</td>
+						<td valign="top" width="0px">
+							<div id="textingL"></div>
+						</td>
+					</tr>
+				</table>
 			</td>
 		</tr>
 		<tr>
@@ -1175,29 +1197,34 @@
 				<div id="dy"></div>
 			</td>
 		</tr>
-	</table>
-
-	<div id="dx"></div>
-	<!--<INPUT type="text" ID=redCell value="">-->
-	<small>
-		<DIV id="redTxt"></div>
-	</small>
-	<table border=0 cellSpacing=0 cellPadding=1>
 		<tr>
-			<td valign="top" id="column3">
-				<div id="nt"></div>
-				<small>
-					<div id="stat"></div>
-				</small>
-			</td>
-			<td valign="top" width="150px">
-				<div id="texting"></div>
+			<td colspan="3">
+				<!--<div id="dx"></div>-->
+				<!--<small>
+					<DIV id="redTxt"></div>
+				</small>-->
+				<table border=0 cellSpacing=0 cellPadding=1>
+					<tr>
+						<td valign="top" id="column3">
+							<div id="nt"></div>
+							<small>
+								<div id="stat"></div>
+							</small>
+						</td>
+						<td valign="top" width="150px">
+							<div id="texting"></div>
+						</td>
+					</tr>
+				</table>
+				<!--<div id="ex"></div>-->
+				<!--<div id="displ"></div>-->
+				<!--<div id="histo"></div>-->
+
 			</td>
 		</tr>
 	</table>
-	<div id="ex"></div>
-	<div id="displ"></div>
-	<div id="histo"></div>
+
+	<!--<INPUT type="text" ID=redCell value="">-->
 </BODY>
 
 </HTML>
