@@ -250,6 +250,7 @@
 			//cell.style.fontSize = `${fontK * parseInt(window.getComputedStyle(cellSize).fontSize, 10)}px`;
 			cell.style.fontSize = `${fontK * 100}%`;
 			changeSize = 0;
+
 		}
 
 		// Robot function to find and click on lines
@@ -459,6 +460,9 @@
 			//document.cookie = `roboSwitch=${roboSwitch}; expires=${expires}; path=/`;
 			saveValue('roboSwitch', roboSwitch);
 			writeText();
+			document.getElementById("grayBtn").value = gameLevel;
+			document.getElementById("grayBtn").style.backgroundColor =
+				roboSwitch === 1 ? index2Color(2) : index2Color(0);
 		}
 
 		// 
@@ -1160,7 +1164,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">12</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">13</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0>
 		<tr>
 			<td></td>
