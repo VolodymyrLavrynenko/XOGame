@@ -29,7 +29,6 @@
 		const width = window.innerWidth;
 		let linesWidth = 20;
 		let tableWidth = 1000;
-		//linesWidth = width / 10;
 		let orientation = (window.innerWidth > window.innerHeight) ? "landscape" : "portrait";
 
 		function cellId(n, x, y) {
@@ -58,28 +57,13 @@
 			const parts = value.split(`; ${name}=`);
 			if (parts.length === 2) return parts.pop().split(';').shift();
 		}
-		//let username = getCookie("username");
 
 		function printCookie() {
 			document.getElementById("displ").innerHTML = document.cookie;
-			//hisCoo = JSON.parse(getCookie("his"));
-			//his = hisCoo || [];
-			//document.getElementById("histo").innerHTML = hisCoo;
 		}
 
 		function deleteCookie() {
 			localStorage.clear();
-			//localStorage.removeItem('fieldMatrix');
-			//document.cookie = "fieldSize=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			//document.cookie = "FS=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			//document.cookie = "level=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			//document.cookie = "firstColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			//document.cookie = "secondColorIndex=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			//document.cookie = "his=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			//document.cookie = "fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			//document.cookie = "roboSwitch=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";//
-			//document.getElementById("displ").innerHTML = document.cookie;
-
 		}
 
 		//Bill function to count the number of lines
@@ -97,10 +81,8 @@
 			displOne(a, b);
 			displText(a, b);
 			if (a + b < fieldSize * fieldSize - ((fieldSize - 1) / 2) * (((fieldSize - 1) / 2) - 1) * 2) {
-				//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
 				writeMatrix();
 			} else {
-				//document.cookie = `fieldMatrix=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
 				localStorage.removeItem('fieldMatrix');
 			}
 
@@ -126,14 +108,6 @@
 			const fs = fieldSize;
 			const lon = fs * fs - ((fs - 1) / 2) * (((fs - 1) / 2) - 1) * 2;
 
-			// Відображення рахунку на панелі
-			//for (let i = 0; i < lon; i++) {
-			//	document.getElementById(cellIdL("e", i, 0)).bgColor =
-			//		i < a ? index2Color(firstColorIndex) : (i >= lon - b ? index2Color(secondColorIndex) : index2Color(2));
-			//	document.getElementById(cellIdL("f", i, 0)).bgColor =
-			//		i < b ? index2Color(secondColorIndex) : (i >= lon - a ? index2Color(firstColorIndex) : index2Color(2));
-			//}
-
 			// Формування рядка поточної партії
 			let dif = a - b, col = firstColorIndex, f = 0;
 			if (dif < 0) {
@@ -149,9 +123,7 @@
 			if (a + b == lon) {
 				gameOver = 1;
 				his.push([fieldSize, gameLevel, a, b]);
-				//document.cookie = `his=${JSON.stringify(his)}; expires=${expires}; path=/`;
 				saveHis();
-				//document.cookie = `roboSwitch=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
 				localStorage.removeItem('roboSwitch');
 			} else {
 				currentRow = `<tr>
@@ -162,7 +134,6 @@
 					<td align = center>${b}</td>
 				</tr>`;
 				allVal = a - b;
-				//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
 			}
 
 			// Формування історії
@@ -231,7 +202,6 @@
 				fontK = 0.5;
 			} else
 				if (allVal > lon) {
-					//newLevel = 1;
 					newLevel = (gameLevel > 0) ? 1 : 0;
 					document.getElementById("level").bgColor = index2Color(firstColorIndex);
 					document.getElementById("size").bgColor = index2Color(firstColorIndex);
@@ -244,10 +214,8 @@
 			// Оновлення відображення all
 			f = (col == -1) ? 0 : 1;
 			const cell = document.getElementById("all");
-			//const cellSize = document.getElementById("size");
 			cell.innerHTML = `<font color="${index2Color(f)}">${allValModule}</font>`;
 			cell.bgColor = index2Color(col);
-			//cell.style.fontSize = `${fontK * parseInt(window.getComputedStyle(cellSize).fontSize, 10)}px`;
 			cell.style.fontSize = `${fontK * 100}%`;
 			changeSize = 0;
 
@@ -265,21 +233,6 @@
 				: (gameColorIndex == firstColorIndex
 					? fieldMatrix.map(row => row.map(val => val === 1 ? 1 : 0))
 					: fieldMatrix.map(row => row.slice()));
-
-			// 2. Пошук можливих квадратів
-			//let mxsq = [];
-			//for (let y = 0; y < fs; y++) {
-			//	for (let x = 0; x < fs; x++) {
-			//		let xx = 2 * x + 1, yy = 2 * y + 1;
-			//		if (
-			//			matrix[yy - 1][xx - 1] === 1 && matrix[yy - 1][xx + 1] === 1 &&
-			//			matrix[yy + 1][xx - 1] === 1 && matrix[yy + 1][xx + 1] === 1 &&
-			//			matrix[yy][xx] === 0
-			//		) {
-			//			mxsq.push([yy, xx]);
-			//		}
-			//	}
-			//}
 
 			// 3. Пошук можливих ліній
 			let mxlnv = [], mxlnh = [];
@@ -418,19 +371,6 @@
 					Number(mx[ysq][xsq + 1]);
 				if (sum === 3) {
 					ln[2]++;
-					//if (Number(mx[ysq - 1][xsq]) === 0) {
-					//	mx[ysq - 1][xsq] = 1;
-					//	lnCheckH(mx, ln, ysq - 1, xsq);
-					//} else if (Number(mx[ysq + 1][xsq]) === 0) {
-					//	mx[ysq + 1][xsq] = 1;
-					//	lnCheckH(mx, ln, ysq + 1, xsq);
-					//} else if (Number(mx[ysq][xsq - 1]) === 0) {
-					//	mx[ysq][xsq - 1] = 1;
-					//	lnCheckV(mx, ln, ysq, xsq - 1);
-					//} else if (Number(mx[ysq][xsq + 1]) === 0) {
-					//	mx[ysq][xsq + 1] = 1;
-					//	lnCheckV(mx, ln, ysq, xsq + 1);
-					//}
 					if (Number(mx[ysq - 1][xsq]) === 0) {
 						mx[ysq - 1][xsq] = 1;
 						lnCheckH(mx, ln, ysq - 1, xsq);
@@ -453,11 +393,9 @@
 
 		//
 		function roboColor(idTab) {
-			//const fs = FS;
 			roboSwitch = roboSwitch === 0 ? 1 : 0;
 			document.getElementById(cellId(pref, 2 * FS - 1, 2 * FS - 1)).bgColor =
 				roboSwitch === 1 ? index2Color(2) : index2Color(0);
-			//document.cookie = `roboSwitch=${roboSwitch}; expires=${expires}; path=/`;
 			saveValue('roboSwitch', roboSwitch);
 			writeText();
 			document.getElementById("grayBtn").value = gameLevel;
@@ -480,7 +418,6 @@
 								break;
 							}
 						}
-						//docment.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
 						if (cId) {
 							await delay(100);
 							if (gameOver == 0) {
@@ -563,23 +500,13 @@
 		}
 
 		function firstColorSet() {
-			//if (Number(getCookie("firstColorIndex")) <= 0) {
-			//	firstColorIndex = Number(parseInt(getCookie("firstColorIndex"), 10));
-			//	secondColorIndex = Number(parseInt(getCookie("secondColorIndex"), 10));
-			//}
-			//firstColorIndex = Number(getCookie("firstColorIndex")) || firstColorIndex;
 			firstColorIndex = Number(getValue('firstColorIndex', firstColorIndex));
-
-			//secondColorIndex = Number(getCookie("secondColorIndex")) || secondColorIndex;
 			secondColorIndex = Number(getValue('secondColorIndex', secondColorIndex));
-
 			if (firstColorIndex === 0) {
 				firstColorIndex = gameColorIndex;
 				secondColorIndex = (firstColorIndex === -1) ? -2 : -1;
 			}
-			//document.cookie = `firstColorIndex=${firstColorIndex}; expires=${expires}; path=/`;
 			saveValue('firstColorIndex', firstColorIndex);
-			//document.cookie = `secondColorIndex=${secondColorIndex}; expires=${expires}; path=/`;
 			saveValue('secondColorIndex', secondColorIndex);
 		}
 
@@ -631,20 +558,12 @@
 				autoSet(idTab, fs);
 				if (refill === 0) { colsel(pref + "0101"); }
 			}
-			//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
 			bill(fs);
 		}
 
 		// Function to toggle the color selection
 		function colsel(id) {
-			//firstColorSet();
-			//if (Number(getCookie("firstColorIndex")) <= 0) {
-			//	firstColorIndex = Number(parseInt(getCookie("firstColorIndex"), 10));
-			//	secondColorIndex = Number(parseInt(getCookie("secondColorIndex"), 10));
-			//}
-			//firstColorIndex = Number(getCookie("firstColorIndex")) || firstColorIndex;
 			firstColorIndex = Number(getValue('firstColorIndex', firstColorIndex));
-			//secondColorIndex = Number(getCookie("secondColorIndex")) || secondColorIndex;
 			secondColorIndex = Number(getValue('secondColorIndex', secondColorIndex));
 			if (firstColorIndex === 0) {
 				secondColorIndex = gameColorIndex;
@@ -659,8 +578,6 @@
 				f = 1;
 			}
 			document.getElementById(id).innerHTML = `<font color=${index2Color(f)}>${document.getElementById(id).innerText}</font>`;
-			//document.cookie = 'firstColorIndex=' + firstColorIndex + '; expires=' + expires + '; path=/';
-			//document.cookie = 'secondColorIndex=' + secondColorIndex + '; expires=' + expires + '; path=/';
 			saveValue('firstColorIndex', firstColorIndex);
 			saveValue('secondColorIndex', secondColorIndex);
 		}
@@ -679,14 +596,12 @@
 		}
 
 		function writeMatrix() {
-			//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
 			// Зберегти матрицю
 			localStorage.setItem('fieldMatrix', JSON.stringify(fieldMatrix));
 		}
 
 		function readMatrix() {
 			// Отримати матрицю
-			//alert(JSON.parse(localStorage.getItem('fieldMatrix')));
 			fieldMatrix = JSON.parse(localStorage.getItem('fieldMatrix') || '[]');
 		}
 
@@ -705,22 +620,15 @@
 			let cellWidth;
 			let cellHeight;
 			fieldMatrix = Array.from({ length: FS * 2 + 2 }, () => Array(FS * 2 + 1).fill(0));
-			//if (change == 0 && hasCookie("fieldMatrix") && getCookie("fieldMatrix").length > 20) {
 			if (change == 0 && localStorage.getItem('fieldMatrix') !== null) {
-				//fieldMatrix = JSON.parse(getCookie("fieldMatrix"));
-				// Копіювання значень з matrix2 у matrix1
-				//fieldMatrix = JSON.parse(getCookie("fieldMatrix")).map(row => row.slice());
 				readMatrix();
 			}
 			let dF = FS - fs
-			//html.push(`<TABLE border=0 cellSpacing=0 id="vartab" style="table-layout: fixed; border-collapse: collapse; width: ${tableWidth}px; height: ${tableWidth}px; font-size: ${Math.floor(tableWidth / (FS * 2 + 1))}px;">`);
 			html.push(`<TABLE border=0 cellSpacing=0 id="vartab" style="table-layout: fixed; border-collapse: collapse; width: ${tableWidth}px; height: ${tableWidth}px;">`);
 			for (let y = 0; y < FS * 2 + 1; y++) {
-				//html.push('<TR' + (y % 2 == 1 ? ' style="height:' + linesWidth + 'px"' : ' style="height:' + 6 + 'px"') + '>');
 				html.push(`<TR style="height:${y % 2 == 1 ? linesWidth : linesWidth / 10}px;">`);
 				for (let x = 0; x < FS * 2 + 1; x++) {
 					X = x - dF; Y = y - dF;
-					//let td = `<TD style="height:${y % 2 == 1 ? linesWidth : linesWidth / 10}px;" id="${cellId(pref, x, y)}" bgcolor="`;
 					let td = `<TD id="${cellId(pref, x, y)}" bgcolor="`;
 					let ck = 0;
 					// Визначаємо колір клітинки
@@ -743,8 +651,6 @@
 					) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2) { td += index2Color(1); }// black perimeter 
 					else { td += index2Color(2); ck = 1; }// gray # area
 					td += '"';
-					//if (x % 2 == 1) td += ' width="' + linesWidth + 'px"';
-					//td += (x % 2 == 1 ? ' style="width:' + linesWidth + 'px"' : ' style="width:' + 4 + 'px"');
 					cellWidth = (x % 2 == 1 ? linesWidth : linesWidth / 10);
 					cellHeight = (y % 2 == 1 ? linesWidth : linesWidth / 10);
 					td += ` style="width:${cellWidth}px; height:${cellHeight}px; max-height:${cellHeight}px; min-height:${cellHeight}px; padding:0px; margin:0px; border:0px; font-size:${tableWidth / (1.5 * FS)}px; line-height:${cellHeight}px; overflow:hidden; vertical-align:middle; white-space: nowrap;"`;
@@ -771,13 +677,11 @@
 					td += ' align="center" valign="middle">';
 					// Символи
 					if ((x == 1 && y == 1)) { td += `<font color=${index2Color(0)}>${fs}</font>`; }
-					//else if (x == 3 && y == 1) { td += `<span style="font-size:${linesWidth * 3.0}px;">+</span>`; }
 					else if (x == 3 && y == 1) { td += "+"; }
 					else if (x == 1 && y == 3) { td += "-"; }
 					else if (x == FS * 2 - 1 && y == FS * 2 - 3) { td += "+"; }
 					else if (x == FS * 2 - 3 && y == FS * 2 - 1) { td += "-"; }
 					else if (x == 1 && y == FS * 2 - 1) { td += '>' }
-					//else if (x == 1 && y == FS * 2 - 1) { td += `<input type="button" value=">" onclick="fnAuto()" id="autoBtn" style="width: 100%; height: 100%; font-size: ${tableWidth / (1.5 * FS)}px; display: block; padding: 0; margin: 0; border: none;">`; }
 					else if (x == 3 && y == FS * 2 - 1) { td += '#' }
 					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += '?' }
 					else if (x == FS * 2 - 3 && y == 1) { td += 'W'; }
@@ -795,25 +699,15 @@
 
 		// Initial call to set up the game board
 		function writeHtml(change) {
-			//deleteCookie();
-			//alert(`fsi=${fsi}`);
-			//FS = Number(getCookie("FS")) || FS;
-			//tableWidth = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight * 0.9;
 			tableWidth = Math.min(window.innerWidth, window.innerHeight) * 0.95;
 			FS = Number(getValue("FS", 7));
-			//roboSwitch = Number(getCookie("roboSwitch")) || roboSwitch;
 			roboSwitch = Number(getValue("roboSwitch", roboSwitch));
-			//fieldSize = fsi;
-			//fieldSize = Number(getCookie("fieldSize")) || fieldSize;
 			fieldSize = Number(getValue("fieldSize", 7));
 			const fs = fieldSize;
-			//gameLevel = Number(getCookie("level")) || gameLevel;
 			gameLevel = Number(getValue('level', gameLevel));
-			//his = JSON.parse(getCookie("his") || JSON.stringify(his));
 			getHis();
 			matrixCell = []; // Очищення
 			document.getElementById("column1").style.width = `${24 * FS + 20}px`;
-			//alert(`FS=${FS}, fieldSize=${fieldSize}, fs=${fs}`);
 
 			// Оновлення ігрового поля
 			document.getElementById("tc").innerHTML = createCoordX(fs);
@@ -839,7 +733,6 @@
 			// Додаємо обробники кліків для кожної клітинки
 			matrixCell.forEach(id => {
 				const cell = document.getElementById(id);
-				//cell.addEventListener('click', function (e) {
 				// Замість addEventListener можна використовувати onclick, щоб не накопичувати події:
 				cell.onclick = function (e) {
 					const rect = this.getBoundingClientRect();
@@ -858,10 +751,7 @@
 			robot(0);
 			bill(fs);
 			writeText()
-			//grayCellId.bgColor = roboSwitch == 1 ? index2Color(2) : index2Color(0);
-			//alert(width);
 			document.getElementById("grayBtn").value = gameLevel;
-
 		}
 
 		function writeText() {
@@ -1030,12 +920,8 @@
 			if (changeSize == 0) {
 				fieldSize = fieldSize + delta;
 				if (delta > 0 && FS < fieldSize) { FS = fieldSize; }
-				//document.cookie = `fieldSize=${fieldSize}; expires=" + expires + "; path=/`;
 				saveValue("fieldSize", fieldSize);
-				//document.cookie = `FS=${FS > fieldSize ? FS : fieldSize}; expires=" + expires + "; path=/`;
-				//document.cookie = `FS=${FS}; expires=" + expires + "; path=/`;
 				saveValue("FS", FS);
-				//document.cookie = `fieldMatrix=${JSON.stringify(fieldMatrix)}; expires=${expires}; path=/`;
 				writeMatrix();
 				writeHtml(1);
 			}
@@ -1045,7 +931,6 @@
 			if (gameLevel > 0 || delta > 0) {
 				gameLevel = gameLevel + delta;
 				document.getElementById(cellId("v", FS * 2 - 1, FS * 2 - 1)).innerText = gameLevel;
-				//document.cookie = `level=${gameLevel}; expires=" + expires + "; path=/`;
 				saveValue("level", gameLevel);
 			}
 		}
@@ -1105,30 +990,6 @@
 
 	</script>
 
-	<!--<style>
-		#vartab {
-			width: 90vw;
-			/* 90% ширини вікна */
-			max-width: 100vw;
-			/* не більше ширини вікна */
-			height: auto;
-		}
-	</style>-->
-	<!-- ...existing code... -->
-	<style>
-		/*#vartab {
-			table-layout: fixed;
-			width: 600px;
-			height: 600px;
-		}*/
-
-		/*#vartab td {
-			padding: 0;
-			margin: 0;
-			border: none;
-
-		}*/
-	</style>
 	<style>
 		/* Скидання стилів для всієї сторінки */
 		html,
@@ -1164,7 +1025,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">13</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">14</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0>
 		<tr>
 			<td></td>
@@ -1179,8 +1040,6 @@
 			<td valign="top">
 				<div id="tx"></div>
 			</td>
-			<!--<td valign="top" id="column2">
-			</td>-->
 			<td rowspan="3" align="left" valign="top">
 				<div id="dyL"></div>
 				<table border=0 cellSpacing=0 cellPadding=1>
@@ -1202,16 +1061,10 @@
 			<td></td>
 			<td>
 				<div id="dy"></div>
-				<!--<input type="button" value=">" onclick="fnAuto()" id="autoBtn0"
-					style="width: 40px; height: 40px; font-size: 24px;">-->
 			</td>
 		</tr>
 		<tr>
 			<td colspan="3">
-				<!--<div id="dx"></div>-->
-				<!--<small>
-					<DIV id="redTxt"></div>
-				</small>-->
 				<table border=0 cellSpacing=0 cellPadding=1>
 					<tr>
 						<td valign="top" id="column3">
