@@ -66,6 +66,16 @@
 			localStorage.clear();
 		}
 
+		function resetGame() {
+			//localStorage.removeItem('fieldMatrix');
+			//localStorage.removeItem('his');
+			//localStorage.removeItem('roboSwitch');
+			if (confirm('Are you sure you want to completely reset the game??')) {
+				localStorage.clear();
+				location.reload();
+			}
+		}
+
 		//Bill function to count the number of lines
 		function bill(fieldSize) {
 			let a = 0, b = 0;
@@ -663,16 +673,14 @@
 					else if (x == FS * 2 - 3 && y == FS * 2 - 1) { td += "fnLevel(-1)"; } //-
 					else if (x == 3 && y == FS * 2 - 1) { td += "fnNewGame()"; } //#
 					else if (x == 1 && y == FS * 2 - 1) { td += "fnAuto()"; } //>
-					//else if (x == 1 && y == FS * 2 - 1) { td += ""; } //>
 					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += "fnQuery()"; }
 					else if (x == (2 * FS - 1) && y == 1) { td += "robot(0)"; }
 					else if (x == 2 * FS - 1 && y == 2 * FS - 1) { td += "roboColor('vartab')"; }
 					else if (ck == 1 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { td += "clickh('" + cellId(pref, x, y) + "')"; }
 					else if (ck != 2 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { matrixCell.push(cellId(pref, x, y)); }
 					else if (x == FS * 2 - 3 && y == 1) { td += "fnWorm()"; } //W
-					//else if (x == FS * 2 - 3 && y == 1) { td += "readMatrix()"; } //W
 					else if (x == FS * 2 - 1 && y == 3) { td += "fnSnake()"; } //S
-					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += "deleteCookie()"; }//R
+					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += "resetGame()"; }//R
 					td += '"';
 					td += ' align="center" valign="middle">';
 					// Символи
@@ -766,7 +774,7 @@
 			document.getElementById(textingId).innerHTML += `<hr>Click on the gray square <input type="button" value="1" onclick="roboColor('vartab')" id="grayBtn" style="width: 30px; height: 30px; font-size: 24px;background-color:#eee; border:none;"> to toggle the robot on/off.`;
 			document.getElementById(textingId).innerHTML += `<br>White square <input type="button" value=" " onclick="robot(0)" id="whiteBtn" style="width: 30px; height: 30px; font-size: 24px; background-color:#fff;"> in the upper right corner - robot progress.`;
 			document.getElementById(textingId).innerHTML += `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - hint<br>`;
-			document.getElementById(textingId).innerHTML += `<br><input type="button" value="R" onclick="deleteCookie()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game<br>`;
+			document.getElementById(textingId).innerHTML += `<br><input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game<br>`;
 		}
 		// Function to create the display area for the game
 		function createDisplOne(fs) {
@@ -1025,7 +1033,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">14</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">15</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0>
 		<tr>
 			<td></td>
