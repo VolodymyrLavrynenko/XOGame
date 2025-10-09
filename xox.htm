@@ -249,7 +249,6 @@
 			cell.bgColor = index2Color(col);
 			//cell.style.fontSize = `${fontK * parseInt(window.getComputedStyle(cellSize).fontSize, 10)}px`;
 			cell.style.fontSize = `${fontK * 100}%`;
-
 			changeSize = 0;
 		}
 
@@ -753,8 +752,8 @@
 					else if (x == FS * 2 - 1 && y == FS * 2 - 3) { td += "fnLevel(1)"; } //+
 					else if (x == FS * 2 - 3 && y == FS * 2 - 1) { td += "fnLevel(-1)"; } //-
 					else if (x == 3 && y == FS * 2 - 1) { td += "fnNewGame()"; } //#
-					//else if (x == 1 && y == FS * 2 - 1) { td += "fnAuto()"; } //>
-					else if (x == 1 && y == FS * 2 - 1) { td += ""; } //>
+					else if (x == 1 && y == FS * 2 - 1) { td += "fnAuto()"; } //>
+					//else if (x == 1 && y == FS * 2 - 1) { td += ""; } //>
 					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += "fnQuery()"; }
 					else if (x == (2 * FS - 1) && y == 1) { td += "robot(0)"; }
 					else if (x == 2 * FS - 1 && y == 2 * FS - 1) { td += "roboColor('vartab')"; }
@@ -857,6 +856,7 @@
 			writeText()
 			//grayCellId.bgColor = roboSwitch == 1 ? index2Color(2) : index2Color(0);
 			//alert(width);
+			document.getElementById("grayBtn").value = gameLevel;
 
 		}
 
@@ -869,9 +869,10 @@
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}; font-weight: bold;">${gameLevel}</span> is game level`;
 			document.getElementById(textingId).innerHTML += '<br>Try pressing <input type="button" value=">" onclick="fnAuto()" id="autoBtn1" style="width: 30px; height: 30px; font-size: 24px;"> to get started. The first moves will be automatic.';
 			document.getElementById(textingId).innerHTML += '<br>The goal is to get more squares of your color to move to a higher level and board size.';
-			document.getElementById(textingId).innerHTML += '<hr>Click on the gray square to toggle the robot on/off.';
-			document.getElementById(textingId).innerHTML += '<br>White square in the upper right corner - robot progress.';
-			document.getElementById(textingId).innerHTML += '<br>? - hint<br>';
+			document.getElementById(textingId).innerHTML += `<hr>Click on the gray square <input type="button" value="1" onclick="roboColor('vartab')" id="grayBtn" style="width: 30px; height: 30px; font-size: 24px;background-color:#eee; border:none;"> to toggle the robot on/off.`;
+			document.getElementById(textingId).innerHTML += `<br>White square <input type="button" value=" " onclick="robot(0)" id="whiteBtn" style="width: 30px; height: 30px; font-size: 24px; background-color:#fff;"> in the upper right corner - robot progress.`;
+			document.getElementById(textingId).innerHTML += `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - hint<br>`;
+			document.getElementById(textingId).innerHTML += `<br><input type="button" value="R" onclick="deleteCookie()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game<br>`;
 		}
 		// Function to create the display area for the game
 		function createDisplOne(fs) {
@@ -1159,13 +1160,23 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">11</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">12</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0>
 		<tr>
 			<td></td>
 			<td id="column1">
 				<div id="tc"></div>
 			</td>
+		</tr>
+		<tr>
+			<td valign="top">
+				<div id="tv"></div>
+			</td>
+			<td valign="top">
+				<div id="tx"></div>
+			</td>
+			<!--<td valign="top" id="column2">
+			</td>-->
 			<td rowspan="3" align="left" valign="top">
 				<div id="dyL"></div>
 				<table border=0 cellSpacing=0 cellPadding=1>
@@ -1181,16 +1192,6 @@
 						</td>
 					</tr>
 				</table>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top">
-				<div id="tv"></div>
-			</td>
-			<td valign="top">
-				<div id="tx"></div>
-			</td>
-			<td valign="top" id="column2">
 			</td>
 		</tr>
 		<tr>
