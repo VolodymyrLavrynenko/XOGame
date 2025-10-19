@@ -679,7 +679,7 @@
 					else if (ck == 1 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { td += "clickh('" + cellId(pref, x, y) + "')"; }
 					else if (ck != 2 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { matrixCell.push(cellId(pref, x, y)); }
 					else if (x == FS * 2 - 3 && y == 1) { td += "fnWorm()"; } //W
-					else if (x == FS * 2 - 1 && y == 3) { td += "fnSnake()"; } //S
+					else if (x == FS * 2 - 1 && y == 3) { td += "fnSnakeII()"; } //S
 					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += "resetGame()"; }//R
 					td += '"';
 					td += ' align="center" valign="middle">';
@@ -834,27 +834,31 @@
 				dx = -1; dy = 0;
 			} else { dx = 0; dy = -1; }
 			x = x + dx; y = y + dy; i++;
-			if (i % 2 == 0) { await delay(200); }
+			if (i % 2 == 0) { await delay(400); }
 			fnWorm();
 		}
 
-		let cYX = [];
+		let cYX = [], xs = 1, ys = 1, is = 0;
 
 		async function fnSnake() {
-			colorX[i] = document.getElementById(cellId(pref, x + 0, y + 0)).bgColor;
-			coord[i] = cellId(pref, x, y);
-			cYX.push([y, x]);
-			document.getElementById(coord[i]).bgColor = document.getElementById("v0101").bgColor;
-			if (i > wLength + 1) { document.getElementById(coord[i - 2 - wLength]).bgColor = colorX[i - 2 - wLength]; }
+			colorX[is] = document.getElementById(cellId(pref, xs + 0, ys + 0)).bgColor;
+			coord[is] = cellId(pref, xs, ys);
+			cYX.push([ys, xs]);
+			if (ys % 2 == 1 && xs % 2 == 1) {
+				//document.getElementById(coord[is]).bgColor = document.getElementById("v0101").bgColor;
+				document.getElementById(coord[is]).bgColor = "#e0e0ff";
+			}
+			if (is > wLength + 1) { document.getElementById(coord[is - 2 - wLength]).bgColor = colorX[is - 2 - wLength]; }
 			let step = [];
 
-			if (i == 0) { step.push([0, 1]) }
-			if (i > 0) {
+			if (is == 0) { step.push([1, 2]) }
+			if (is > 0) {
 				let cYXlast = cYX.slice(-wLength);
 				let st, cm = [];
-				let yn = y - 1, xn = x;
+
+				let yn = ys - 1, xn = xs;
 				st = 0;
-				if (yn >= 0 && (cYX[i - 1][0] != yn || cYX[i - 1][1] != xn) && !(yn % 2 != 0 && xn % 2 != 0)) {
+				if (yn >= 0 && (cYX[is - 1][0] != yn || cYX[is - 1][1] != xn) && !(yn % 2 != 1 && xn % 2 != 1)) {
 					for (cm of cYXlast) {
 						if (cm[0] == yn - 1 && cm[1] == xn) {
 							st = 1;
@@ -864,9 +868,9 @@
 						step.push([yn, xn]);
 					}
 				}
-				yn = y + 1, xn = x;
+				yn = ys + 1, xn = xs;
 				st = 0;
-				if (yn <= 2 * fieldSize && (cYX[i - 1][0] != yn || cYX[i - 1][1] != xn) && !(yn % 2 != 0 && xn % 2 != 0)) {
+				if (yn <= 2 * fieldSize && (cYX[is - 1][0] != yn || cYX[is - 1][1] != xn) && !(yn % 2 != 1 && xn % 2 != 1)) {
 					for (cm of cYXlast) {
 						if (cm[0] == yn + 1 && cm[1] == xn) {
 							st = 1;
@@ -876,9 +880,9 @@
 						step.push([yn, xn]);
 					}
 				}
-				yn = y, xn = x - 1;
+				yn = ys, xn = xs - 1;
 				st = 0;
-				if (xn >= 0 && (cYX[i - 1][0] != yn || cYX[i - 1][1] != xn) && !(yn % 2 != 0 && xn % 2 != 0)) {
+				if (xn >= 0 && (cYX[is - 1][0] != yn || cYX[is - 1][1] != xn) && !(yn % 2 != 1 && xn % 2 != 1)) {
 					for (cm of cYXlast) {
 						if (cm[0] == yn && cm[1] == xn - 1) {
 							st = 1;
@@ -888,9 +892,9 @@
 						step.push([yn, xn]);
 					}
 				}
-				yn = y, xn = x + 1;
+				yn = ys, xn = xs + 1;
 				st = 0;
-				if (xn <= 2 * fieldSize && (cYX[i - 1][0] != yn || cYX[i - 1][1] != xn) && !(yn % 2 != 0 && xn % 2 != 0)) {
+				if (xn <= 2 * fieldSize && (cYX[is - 1][0] != yn || cYX[is - 1][1] != xn) && !(yn % 2 != 1 && xn % 2 != 1)) {
 					for (cm of cYXlast) {
 						if (cm[0] == yn && cm[1] == xn + 1) {
 							st = 1;
@@ -902,18 +906,119 @@
 				}
 			}
 			if (step.length == 0) {
-				y = 0;
-				x = 0;
+				ys = 1;
+				xs = 1;
 			}
 			if (step.length > 0) {
 				const randomInt = Math.floor(Math.random() * (step.length - 0 + 0)) + 0;
-				y = step[randomInt][0];
-				x = step[randomInt][1];
+				ys = step[randomInt][0];
+				xs = step[randomInt][1];
 			}
-			i++;
+			is++;
 			await delay(300);
 			fnSnake();
 		}
+
+		let snakeMatrix = [], N = 7;
+
+		async function fnSnakeII(deltaYold, deltaXold) {
+			let deltaY = 0, deltaX = 0;
+			if (is == 0) { xs = 0; ys = 0; snakeMatrix = []; deltaY = 0; deltaX = 1; }
+			else {
+				let stepMatrix = [];
+				let exists;
+				if (ys + deltaYold < FS / 2 && xs + deltaXold < FS / 2 && ys + deltaYold > -FS / 2 && xs + deltaXold > -FS / 2) {
+					exists = snakeMatrix.some(item => item[0] === ys + deltaYold && item[1] === xs + deltaXold);
+					if (!exists) {
+						stepMatrix.push([ys + deltaYold, xs + deltaXold]);
+						stepMatrix.push([ys + deltaYold, xs + deltaXold]);
+						stepMatrix.push([ys + deltaYold, xs + deltaXold]);
+						stepMatrix.push([ys + deltaYold, xs + deltaXold]);
+					}
+				}
+				deltaY = 1; deltaX = 0;
+				if (ys + deltaY < FS / 2 && xs + deltaX < FS / 2 && ys + deltaY > -FS / 2 && xs + deltaX > -FS / 2) {
+					exists = snakeMatrix.some(item => item[0] === ys + deltaY && item[1] === xs + deltaX);
+					if (!exists) {
+						stepMatrix.push([ys + deltaY, xs + deltaX]);
+					}
+				}
+				deltaY = -1; deltaX = 0;
+				if (ys + deltaY < FS / 2 && xs + deltaX < FS / 2 && ys + deltaY > -FS / 2 && xs + deltaX > -FS / 2) {
+					exists = snakeMatrix.some(item => item[0] === ys + deltaY && item[1] === xs + deltaX);
+					if (!exists) {
+						stepMatrix.push([ys + deltaY, xs + deltaX]);
+					}
+				}
+				deltaY = 0; deltaX = 1;
+				if (ys + deltaY < FS / 2 && xs + deltaX < FS / 2 && ys + deltaY > -FS / 2 && xs + deltaX > -FS / 2) {
+					exists = snakeMatrix.some(item => item[0] === ys + deltaY && item[1] === xs + deltaX);
+					if (!exists) {
+						stepMatrix.push([ys + deltaY, xs + deltaX]);
+					}
+				}
+				deltaY = 0; deltaX = -1;
+				if (ys + deltaY < FS / 2 && xs + deltaX < FS / 2 && ys + deltaY > -FS / 2 && xs + deltaX > -FS / 2) {
+					exists = snakeMatrix.some(item => item[0] === ys + deltaY && item[1] === xs + deltaX);
+					if (!exists) {
+						stepMatrix.push([ys + deltaY, xs + deltaX]);
+					}
+				}
+				if (stepMatrix.length == 0) {
+					deltaY = 0;
+					deltaX = 1;
+					xs = 0;
+					ys = 0;
+				} else {
+					const randomInt = Math.floor(Math.random() * (stepMatrix.length));
+					ys = +stepMatrix[randomInt][0];
+					xs = +stepMatrix[randomInt][1];
+				}
+			}
+			//snakeMatrix.push([ys, xs, document.getElementById(cellId(pref, ys * 2 + FS, xs * 2 + FS)).bgColor]);
+			snakeMatrix.push([ys, xs]);
+			if (snakeMatrix.length > N) {
+				let old = snakeMatrix[0];
+				document.getElementById(cellId(pref, old[0] * 2 + FS, old[1] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[1] * 2 + FS][old[0] * 2 + FS]);
+			}
+			snakeMatrix = snakeMatrix.slice(-N);
+			document.getElementById(cellId(pref, ys * 2 + FS, xs * 2 + FS)).bgColor = adjustColor(document.getElementById(cellId(pref, ys * 2 + FS, xs * 2 + FS)).bgColor, 20);
+			is++;
+			await delay(50);
+			fnSnakeII(deltaY, deltaX);
+		}
+
+		// Функція для автоматичного затемнення або освітлення кольору
+		function adjustColor(hex, percent = 20) {
+			// Видаляємо # якщо є
+			hex = hex.replace(/^#/, '');
+			// Перетворюємо в числа
+			let r = parseInt(hex.substring(0, 2), 16);
+			let g = parseInt(hex.substring(2, 4), 16);
+			let b = parseInt(hex.substring(4, 6), 16);
+
+			// Визначаємо яскравість (перцептивна формула)
+			let brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+
+			// Якщо світлий — затемнюємо, якщо темний — освітлюємо
+			if (brightness > 186) {
+				// Темнішаємо
+				r = Math.max(0, r - Math.round(r * percent / 100));
+				g = Math.max(0, g - Math.round(g * percent / 100));
+				b = Math.max(0, b - Math.round(b * percent / 100));
+			} else {
+				// Світлішаємо
+				r = Math.min(255, r + Math.round((255 - r) * percent / 100));
+				g = Math.min(255, g + Math.round((255 - g) * percent / 100));
+				b = Math.min(255, b + Math.round((255 - b) * percent / 100));
+			}
+
+			// Повертаємо у форматі #rrggbb
+			return "#" + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+		}
+
+		// Приклад використання:
+		//let newColor = adjustColor("#aabbcc"); // автоматично зробить світліший або темніший
 
 		function fnQuery() { robot(1); }// Call the robot function with query = 1
 
@@ -1033,7 +1138,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">15</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">16</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0>
 		<tr>
 			<td></td>
