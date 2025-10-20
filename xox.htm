@@ -30,6 +30,7 @@
 		let linesWidth = 20;
 		let tableWidth = 1000;
 		let orientation = (window.innerWidth > window.innerHeight) ? "landscape" : "portrait";
+		let snake = 0;
 
 		function cellId(n, x, y) {
 			return n + String(y).padStart(2, '0') + String(x).padStart(2, '0');
@@ -679,7 +680,7 @@
 					else if (ck == 1 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { td += "clickh('" + cellId(pref, x, y) + "')"; }
 					else if (ck != 2 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { matrixCell.push(cellId(pref, x, y)); }
 					else if (x == FS * 2 - 3 && y == 1) { td += "fnWorm()"; } //W
-					else if (x == FS * 2 - 1 && y == 3) { td += "fnSnakeII()"; } //S
+					else if (x == FS * 2 - 1 && y == 3) { td += "fnSnake()"; } //S
 					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += "resetGame()"; }//R
 					td += '"';
 					td += ' align="center" valign="middle">';
@@ -840,152 +841,159 @@
 
 		let cYX = [], xs = 1, ys = 1, is = 0;
 
+		let snakeMatrix = [], N;
+
 		async function fnSnake() {
-			colorX[is] = document.getElementById(cellId(pref, xs + 0, ys + 0)).bgColor;
-			coord[is] = cellId(pref, xs, ys);
-			cYX.push([ys, xs]);
-			if (ys % 2 == 1 && xs % 2 == 1) {
-				//document.getElementById(coord[is]).bgColor = document.getElementById("v0101").bgColor;
-				document.getElementById(coord[is]).bgColor = "#e0e0ff";
-			}
-			if (is > wLength + 1) { document.getElementById(coord[is - 2 - wLength]).bgColor = colorX[is - 2 - wLength]; }
-			let step = [];
-
-			if (is == 0) { step.push([1, 2]) }
-			if (is > 0) {
-				let cYXlast = cYX.slice(-wLength);
-				let st, cm = [];
-
-				let yn = ys - 1, xn = xs;
-				st = 0;
-				if (yn >= 0 && (cYX[is - 1][0] != yn || cYX[is - 1][1] != xn) && !(yn % 2 != 1 && xn % 2 != 1)) {
-					for (cm of cYXlast) {
-						if (cm[0] == yn - 1 && cm[1] == xn) {
-							st = 1;
-						}
-					}
-					if (st == 0) {
-						step.push([yn, xn]);
-					}
-				}
-				yn = ys + 1, xn = xs;
-				st = 0;
-				if (yn <= 2 * fieldSize && (cYX[is - 1][0] != yn || cYX[is - 1][1] != xn) && !(yn % 2 != 1 && xn % 2 != 1)) {
-					for (cm of cYXlast) {
-						if (cm[0] == yn + 1 && cm[1] == xn) {
-							st = 1;
-						}
-					}
-					if (st == 0) {
-						step.push([yn, xn]);
-					}
-				}
-				yn = ys, xn = xs - 1;
-				st = 0;
-				if (xn >= 0 && (cYX[is - 1][0] != yn || cYX[is - 1][1] != xn) && !(yn % 2 != 1 && xn % 2 != 1)) {
-					for (cm of cYXlast) {
-						if (cm[0] == yn && cm[1] == xn - 1) {
-							st = 1;
-						}
-					}
-					if (st == 0) {
-						step.push([yn, xn]);
-					}
-				}
-				yn = ys, xn = xs + 1;
-				st = 0;
-				if (xn <= 2 * fieldSize && (cYX[is - 1][0] != yn || cYX[is - 1][1] != xn) && !(yn % 2 != 1 && xn % 2 != 1)) {
-					for (cm of cYXlast) {
-						if (cm[0] == yn && cm[1] == xn + 1) {
-							st = 1;
-						}
-					}
-					if (st == 0) {
-						step.push([yn, xn]);
-					}
-				}
-			}
-			if (step.length == 0) {
-				ys = 1;
-				xs = 1;
-			}
-			if (step.length > 0) {
-				const randomInt = Math.floor(Math.random() * (step.length - 0 + 0)) + 0;
-				ys = step[randomInt][0];
-				xs = step[randomInt][1];
-			}
-			is++;
-			await delay(300);
-			fnSnake();
+			N = 7;
+			snake = (snake == 0) ? 1 : 0;
+			fnSnakeII(0, 1);
 		}
-
-		let snakeMatrix = [], N = 7;
 
 		async function fnSnakeII(deltaYold, deltaXold) {
 			let deltaY = 0, deltaX = 0;
+			if (snake == 0) { N = N - 1; }
 			if (is == 0) { xs = 0; ys = 0; snakeMatrix = []; deltaY = 0; deltaX = 1; }
 			else {
 				let stepMatrix = [];
+				let stepMatrixLabirint = [];
 				let exists;
-				if (ys + deltaYold < FS / 2 && xs + deltaXold < FS / 2 && ys + deltaYold > -FS / 2 && xs + deltaXold > -FS / 2) {
+				if (ys + deltaYold < FS / 2 && xs + deltaXold < FS / 2 && ys + deltaYold > -FS / 2 && xs + deltaXold > -FS / 2
+					&& ys + deltaYold + xs + deltaXold >= -FS / 2 - 1
+					&& ys + deltaYold + xs + deltaXold <= FS / 2 + 1
+					&& -ys - deltaYold + xs + deltaXold >= -FS / 2 - 1
+					&& ys + deltaYold - xs - deltaXold >= -FS / 2 - 1
+				) {
 					exists = snakeMatrix.some(item => item[0] === ys + deltaYold && item[1] === xs + deltaXold);
 					if (!exists) {
-						stepMatrix.push([ys + deltaYold, xs + deltaXold]);
-						stepMatrix.push([ys + deltaYold, xs + deltaXold]);
-						stepMatrix.push([ys + deltaYold, xs + deltaXold]);
-						stepMatrix.push([ys + deltaYold, xs + deltaXold]);
+						//stepMatrix.push([ys + deltaYold, xs + deltaXold]);
+						//stepMatrix.push([ys + deltaYold, xs + deltaXold]);
+						//stepMatrix.push([ys + deltaYold, xs + deltaXold]);
+						//stepMatrix.push([ys + deltaYold, xs + deltaXold]);
 					}
 				}
 				deltaY = 1; deltaX = 0;
-				if (ys + deltaY < FS / 2 && xs + deltaX < FS / 2 && ys + deltaY > -FS / 2 && xs + deltaX > -FS / 2) {
+				if (ys + deltaY < fieldSize / 2 + 0.5
+					&& xs + deltaX < fieldSize / 2
+					&& ys + deltaY > -fieldSize / 2
+					&& xs + deltaX > -fieldSize / 2
+					&& ys + deltaY + xs + deltaX >= -fieldSize / 2 - 1
+					&& ys + deltaY + xs + deltaX <= fieldSize / 2 + 1
+					&& -ys - deltaY + xs + deltaX >= -fieldSize / 2 - 1
+					&& ys + deltaY - xs - deltaX >= -fieldSize / 2 - 1
+				) {
 					exists = snakeMatrix.some(item => item[0] === ys + deltaY && item[1] === xs + deltaX);
 					if (!exists) {
-						stepMatrix.push([ys + deltaY, xs + deltaX]);
+						//stepMatrix.push([ys + deltaY, xs + deltaX]);
+						if (fieldMatrix[(ys + deltaY) * 2 + fieldSize][(xs + deltaX) * 2 + fieldSize] == 0) {
+							stepMatrix.push([ys + deltaY, xs + deltaX]);
+							if (fieldMatrix[(ys + deltaY) * 2 + fieldSize - deltaY][(xs + deltaX) * 2 + fieldSize - deltaX] == 2) {
+								//alert(fieldMatrix[(ys + deltaY) * 2 + FS - deltaY][(xs + deltaX) * 2 + FS - deltaX]);
+								stepMatrixLabirint.push([ys + deltaY, xs + deltaX]);
+							}
+						}
 					}
 				}
 				deltaY = -1; deltaX = 0;
-				if (ys + deltaY < FS / 2 && xs + deltaX < FS / 2 && ys + deltaY > -FS / 2 && xs + deltaX > -FS / 2) {
+				if (ys + deltaY < fieldSize / 2 + 0.5
+					&& xs + deltaX < fieldSize / 2
+					&& ys + deltaY > -fieldSize / 2
+					&& xs + deltaX > -fieldSize / 2
+					&& ys + deltaY + xs + deltaX >= -fieldSize / 2 - 1
+					&& ys + deltaY + xs + deltaX <= fieldSize / 2 + 1
+					&& -ys - deltaY + xs + deltaX >= -fieldSize / 2 - 1
+					&& ys + deltaY - xs - deltaX >= -fieldSize / 2 - 1
+				) {
 					exists = snakeMatrix.some(item => item[0] === ys + deltaY && item[1] === xs + deltaX);
 					if (!exists) {
-						stepMatrix.push([ys + deltaY, xs + deltaX]);
+						//stepMatrix.push([ys + deltaY, xs + deltaX]);
+						if (fieldMatrix[(ys + deltaY) * 2 + fieldSize][(xs + deltaX) * 2 + fieldSize] == 0) {
+							stepMatrix.push([ys + deltaY, xs + deltaX]);
+							if (fieldMatrix[(ys + deltaY) * 2 + fieldSize - deltaY][(xs + deltaX) * 2 + fieldSize - deltaX] == 2) {
+								stepMatrixLabirint.push([ys + deltaY, xs + deltaX]);
+							}
+						}
 					}
 				}
 				deltaY = 0; deltaX = 1;
-				if (ys + deltaY < FS / 2 && xs + deltaX < FS / 2 && ys + deltaY > -FS / 2 && xs + deltaX > -FS / 2) {
+				if (ys + deltaY < fieldSize / 2 + 0.5
+					&& xs + deltaX < fieldSize / 2
+					&& ys + deltaY > -fieldSize / 2
+					&& xs + deltaX > -fieldSize / 2
+					&& ys + deltaY + xs + deltaX >= -fieldSize / 2 - 1
+					&& ys + deltaY + xs + deltaX <= fieldSize / 2 + 1
+					&& -ys - deltaY + xs + deltaX >= -fieldSize / 2 - 1
+					&& ys + deltaY - xs - deltaX >= -fieldSize / 2 - 1
+				) {
 					exists = snakeMatrix.some(item => item[0] === ys + deltaY && item[1] === xs + deltaX);
 					if (!exists) {
-						stepMatrix.push([ys + deltaY, xs + deltaX]);
+						//stepMatrix.push([ys + deltaY, xs + deltaX]);
+						if (fieldMatrix[(ys + deltaY) * 2 + fieldSize][(xs + deltaX) * 2 + fieldSize] == 0) {
+							stepMatrix.push([ys + deltaY, xs + deltaX]);
+							if (fieldMatrix[(ys + deltaY) * 2 + fieldSize - deltaY][(xs + deltaX) * 2 + fieldSize - deltaX] == 2) {
+								stepMatrixLabirint.push([ys + deltaY, xs + deltaX]);
+							}
+						}
 					}
 				}
 				deltaY = 0; deltaX = -1;
-				if (ys + deltaY < FS / 2 && xs + deltaX < FS / 2 && ys + deltaY > -FS / 2 && xs + deltaX > -FS / 2) {
+				if (ys + deltaY < fieldSize / 2 + 0.5
+					&& xs + deltaX < fieldSize / 2
+					&& ys + deltaY > -fieldSize / 2
+					&& xs + deltaX > -fieldSize / 2
+					&& ys + deltaY + xs + deltaX >= -fieldSize / 2 - 1
+					&& ys + deltaY + xs + deltaX <= fieldSize / 2 + 1
+					&& -ys - deltaY + xs + deltaX >= -fieldSize / 2 - 1
+					&& ys + deltaY - xs - deltaX >= -fieldSize / 2 - 1
+				) {
 					exists = snakeMatrix.some(item => item[0] === ys + deltaY && item[1] === xs + deltaX);
 					if (!exists) {
-						stepMatrix.push([ys + deltaY, xs + deltaX]);
+						//stepMatrix.push([ys + deltaY, xs + deltaX]);
+						if (fieldMatrix[(ys + deltaY) * 2 + fieldSize][(xs + deltaX) * 2 + fieldSize] == 0) {
+							stepMatrix.push([ys + deltaY, xs + deltaX]);
+							if (fieldMatrix[(ys + deltaY) * 2 + fieldSize - deltaY][(xs + deltaX) * 2 + fieldSize - deltaX] == 2) {
+								stepMatrixLabirint.push([ys + deltaY, xs + deltaX]);
+							}
+						}
 					}
 				}
-				if (stepMatrix.length == 0) {
-					deltaY = 0;
-					deltaX = 1;
-					xs = 0;
-					ys = 0;
+				if (stepMatrixLabirint.length == 0) {
+					if (stepMatrix.length == 0) {
+						deltaY = 0;
+						deltaX = 1;
+						xs = 0;
+						ys = 0;
+					} else {
+						const randomInt = Math.floor(Math.random() * (stepMatrix.length));
+						ys = +stepMatrix[randomInt][0];
+						xs = +stepMatrix[randomInt][1];
+					}
 				} else {
-					const randomInt = Math.floor(Math.random() * (stepMatrix.length));
-					ys = +stepMatrix[randomInt][0];
-					xs = +stepMatrix[randomInt][1];
+					const randomInt = Math.floor(Math.random() * (stepMatrixLabirint.length));
+					ys = +stepMatrixLabirint[randomInt][0];
+					xs = +stepMatrixLabirint[randomInt][1];
 				}
+
 			}
-			//snakeMatrix.push([ys, xs, document.getElementById(cellId(pref, ys * 2 + FS, xs * 2 + FS)).bgColor]);
 			snakeMatrix.push([ys, xs]);
 			if (snakeMatrix.length > N) {
 				let old = snakeMatrix[0];
-				document.getElementById(cellId(pref, old[0] * 2 + FS, old[1] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[1] * 2 + FS][old[0] * 2 + FS]);
+				document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
+				old = snakeMatrix[1];
+				document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
+				old = snakeMatrix[2];
+				document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
 			}
 			snakeMatrix = snakeMatrix.slice(-N);
-			document.getElementById(cellId(pref, ys * 2 + FS, xs * 2 + FS)).bgColor = adjustColor(document.getElementById(cellId(pref, ys * 2 + FS, xs * 2 + FS)).bgColor, 20);
+			for (let k = 0; k < snakeMatrix.length; k++) {
+				let pos = snakeMatrix[k];
+				document.getElementById(cellId(pref, pos[1] * 2 + FS, pos[0] * 2 + FS)).bgColor = adjustColor(index2Color(fieldMatrix[pos[0] * 2 + fieldSize][pos[1] * 2 + fieldSize]), 70 * k / snakeMatrix.length);
+			}
+			//document.getElementById(cellId(pref, ys * 2 + FS, xs * 2 + FS)).bgColor = adjustColor(document.getElementById(cellId(pref, ys * 2 + FS, xs * 2 + FS)).bgColor, 20);
 			is++;
-			await delay(50);
-			fnSnakeII(deltaY, deltaX);
+			await delay(120);
+			if (N > 0) {
+				fnSnakeII(deltaY, deltaX);
+			}
 		}
 
 		// Функція для автоматичного затемнення або освітлення кольору
@@ -1138,7 +1146,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">16</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">17</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0>
 		<tr>
 			<td></td>
