@@ -31,6 +31,8 @@
 		let tableWidth = 1000;
 		let orientation = (window.innerWidth > window.innerHeight) ? "landscape" : "portrait";
 		let snake = 0;
+		let optymalMatrix = [];
+		let blickMatrix = [];
 
 		function cellId(n, x, y) {
 			return n + String(y).padStart(2, '0') + String(x).padStart(2, '0');
@@ -95,8 +97,8 @@
 				writeMatrix();
 			} else {
 				localStorage.removeItem('fieldMatrix');
+				//bounceTable();
 			}
-
 		}
 
 		function displText(a, b) {
@@ -229,7 +231,6 @@
 			cell.bgColor = index2Color(col);
 			cell.style.fontSize = `${fontK * 100}%`;
 			changeSize = 0;
-
 		}
 
 		// Robot function to find and click on lines
@@ -293,6 +294,7 @@
 				const filtered = (ratemin <= gameLevel * gameLevel || gameLevel === 0 || query === 1)// Filter lines based on game level**2
 					? mxln.filter(a => a[2] <= ratemin)
 					: mxln;
+				optymalMatrix = mxln.filter(a => a[2] <= ratemin);
 				const min = 0, max = filtered.length - 1;// Random selection from filtered lines
 				const randomInt = Math.floor(Math.random() * (max - min + 1)) + min;// Random index
 
@@ -323,6 +325,9 @@
 				if (query == 10) {
 					fnStatus(ratemin, filtered.length);
 				}
+			} else {
+				optymalMatrix = [];
+				//bounceTable();
 			}
 			if (query != 10) {
 				robot(10);
@@ -338,7 +343,7 @@
 			if (rateCount <= 20) {
 				document.getElementById(statId).innerHTML = `${symbol.repeat(rateCount)} : ${filteredLength}`;
 			} else {
-				document.getElementById(statId).innerHTML = ``;
+				document.getElementById(statId).innerHTML = `${symbol.repeat(3)}...${symbol.repeat(3)}`;
 			}
 		}
 
@@ -350,7 +355,7 @@
 		async function fnBlick(y, x) {
 			document.getElementById(cellId(pref, x, y)).bgColor = "#00ff00";// green
 			await delay(1000);
-			document.getElementById(cellId(pref, x, y)).bgColor = index2Color(2);// gray
+			document.getElementById(cellId(pref, x, y)).bgColor = index2Color(fieldMatrix[y + fieldSize - FS][x + fieldSize - FS]);// gray
 		}
 
 		async function fnReNew(y, x) {
@@ -774,7 +779,8 @@
 			document.getElementById(textingId).innerHTML += '<br>The goal is to get more squares of your color to move to a higher level and board size.';
 			document.getElementById(textingId).innerHTML += `<hr>Click on the gray square <input type="button" value="1" onclick="roboColor('vartab')" id="grayBtn" style="width: 30px; height: 30px; font-size: 24px;background-color:#eee; border:none;"> to toggle the robot on/off.`;
 			document.getElementById(textingId).innerHTML += `<br>White square <input type="button" value=" " onclick="robot(0)" id="whiteBtn" style="width: 30px; height: 30px; font-size: 24px; background-color:#fff;"> in the upper right corner - robot progress.`;
-			document.getElementById(textingId).innerHTML += `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - hint<br>`;
+			document.getElementById(textingId).innerHTML += `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint<br>`;
+			document.getElementById(textingId).innerHTML += `<br><input type="button" value="S" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - A wise snake that crawls through a maze and finds successful moves<br>`;
 			document.getElementById(textingId).innerHTML += `<br><input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game<br>`;
 		}
 		// Function to create the display area for the game
@@ -846,31 +852,19 @@
 		async function fnSnake() {
 			N = 7;
 			snake = (snake == 0) ? 1 : 0;
+			blickMatrix = [];
 			fnSnakeII(0, 1);
 		}
 
 		async function fnSnakeII(deltaYold, deltaXold) {
-			let deltaY = 0, deltaX = 0;
+			let deltaY = 0, deltaX = 0, delayMs = 120;
 			if (snake == 0) { N = N - 1; }
 			if (is == 0) { xs = 0; ys = 0; snakeMatrix = []; deltaY = 0; deltaX = 1; }
 			else {
+				let stepMatrixOver = [];
 				let stepMatrix = [];
 				let stepMatrixLabirint = [];
 				let exists;
-				if (ys + deltaYold < FS / 2 && xs + deltaXold < FS / 2 && ys + deltaYold > -FS / 2 && xs + deltaXold > -FS / 2
-					&& ys + deltaYold + xs + deltaXold >= -FS / 2 - 1
-					&& ys + deltaYold + xs + deltaXold <= FS / 2 + 1
-					&& -ys - deltaYold + xs + deltaXold >= -FS / 2 - 1
-					&& ys + deltaYold - xs - deltaXold >= -FS / 2 - 1
-				) {
-					exists = snakeMatrix.some(item => item[0] === ys + deltaYold && item[1] === xs + deltaXold);
-					if (!exists) {
-						//stepMatrix.push([ys + deltaYold, xs + deltaXold]);
-						//stepMatrix.push([ys + deltaYold, xs + deltaXold]);
-						//stepMatrix.push([ys + deltaYold, xs + deltaXold]);
-						//stepMatrix.push([ys + deltaYold, xs + deltaXold]);
-					}
-				}
 				deltaY = 1; deltaX = 0;
 				if (ys + deltaY < fieldSize / 2 + 0.5
 					&& xs + deltaX < fieldSize / 2
@@ -883,13 +877,13 @@
 				) {
 					exists = snakeMatrix.some(item => item[0] === ys + deltaY && item[1] === xs + deltaX);
 					if (!exists) {
-						//stepMatrix.push([ys + deltaY, xs + deltaX]);
 						if (fieldMatrix[(ys + deltaY) * 2 + fieldSize][(xs + deltaX) * 2 + fieldSize] == 0) {
 							stepMatrix.push([ys + deltaY, xs + deltaX]);
 							if (fieldMatrix[(ys + deltaY) * 2 + fieldSize - deltaY][(xs + deltaX) * 2 + fieldSize - deltaX] == 2) {
-								//alert(fieldMatrix[(ys + deltaY) * 2 + FS - deltaY][(xs + deltaX) * 2 + FS - deltaX]);
 								stepMatrixLabirint.push([ys + deltaY, xs + deltaX]);
 							}
+						} else {
+							stepMatrixOver.push([ys + deltaY, xs + deltaX]);
 						}
 					}
 				}
@@ -905,12 +899,13 @@
 				) {
 					exists = snakeMatrix.some(item => item[0] === ys + deltaY && item[1] === xs + deltaX);
 					if (!exists) {
-						//stepMatrix.push([ys + deltaY, xs + deltaX]);
 						if (fieldMatrix[(ys + deltaY) * 2 + fieldSize][(xs + deltaX) * 2 + fieldSize] == 0) {
 							stepMatrix.push([ys + deltaY, xs + deltaX]);
 							if (fieldMatrix[(ys + deltaY) * 2 + fieldSize - deltaY][(xs + deltaX) * 2 + fieldSize - deltaX] == 2) {
 								stepMatrixLabirint.push([ys + deltaY, xs + deltaX]);
 							}
+						} else {
+							stepMatrixOver.push([ys + deltaY, xs + deltaX]);
 						}
 					}
 				}
@@ -926,12 +921,13 @@
 				) {
 					exists = snakeMatrix.some(item => item[0] === ys + deltaY && item[1] === xs + deltaX);
 					if (!exists) {
-						//stepMatrix.push([ys + deltaY, xs + deltaX]);
 						if (fieldMatrix[(ys + deltaY) * 2 + fieldSize][(xs + deltaX) * 2 + fieldSize] == 0) {
 							stepMatrix.push([ys + deltaY, xs + deltaX]);
 							if (fieldMatrix[(ys + deltaY) * 2 + fieldSize - deltaY][(xs + deltaX) * 2 + fieldSize - deltaX] == 2) {
 								stepMatrixLabirint.push([ys + deltaY, xs + deltaX]);
 							}
+						} else {
+							stepMatrixOver.push([ys + deltaY, xs + deltaX]);
 						}
 					}
 				}
@@ -947,12 +943,13 @@
 				) {
 					exists = snakeMatrix.some(item => item[0] === ys + deltaY && item[1] === xs + deltaX);
 					if (!exists) {
-						//stepMatrix.push([ys + deltaY, xs + deltaX]);
 						if (fieldMatrix[(ys + deltaY) * 2 + fieldSize][(xs + deltaX) * 2 + fieldSize] == 0) {
 							stepMatrix.push([ys + deltaY, xs + deltaX]);
 							if (fieldMatrix[(ys + deltaY) * 2 + fieldSize - deltaY][(xs + deltaX) * 2 + fieldSize - deltaX] == 2) {
 								stepMatrixLabirint.push([ys + deltaY, xs + deltaX]);
 							}
+						} else {
+							stepMatrixOver.push([ys + deltaY, xs + deltaX]);
 						}
 					}
 				}
@@ -962,6 +959,27 @@
 						deltaX = 1;
 						xs = 0;
 						ys = 0;
+						///////////
+						let a = 0, cellFree = [];
+						for (let j = 0; j < fieldSize; j++) {
+							for (let k = 0; k < fieldSize; k++) {
+								const val = fieldMatrix[j * 2 + 1][k * 2 + 1];
+								if (!((j * 2 + 1) === 1 && (k * 2 + 1) === 1)) {
+									if (val === firstColorIndex || val === secondColorIndex) { a++; } else {
+									}
+								}
+							}
+						}
+						if (stepMatrixOver.length > 0) {
+							const randomInt = Math.floor(Math.random() * (stepMatrixOver.length));
+							ys = +stepMatrixOver[randomInt][0];
+							xs = +stepMatrixOver[randomInt][1];
+						}
+						if (a < fieldSize * fieldSize - ((fieldSize - 1) / 2) * (((fieldSize - 1) / 2) - 1) * 2) {
+						} else {
+							snake = 0;
+						}
+						////////////
 					} else {
 						const randomInt = Math.floor(Math.random() * (stepMatrix.length));
 						ys = +stepMatrix[randomInt][0];
@@ -977,10 +995,13 @@
 			snakeMatrix.push([ys, xs]);
 			if (snakeMatrix.length > N) {
 				let old = snakeMatrix[0];
+				await delay(snake == 0 ? delayMs / 6 : 0);
 				document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
 				old = snakeMatrix[1];
+				await delay(snake == 0 ? delayMs / 6 : 0);
 				document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
 				old = snakeMatrix[2];
+				await delay(snake == 0 ? delayMs / 6 : 0);
 				document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
 			}
 			snakeMatrix = snakeMatrix.slice(-N);
@@ -988,9 +1009,36 @@
 				let pos = snakeMatrix[k];
 				document.getElementById(cellId(pref, pos[1] * 2 + FS, pos[0] * 2 + FS)).bgColor = adjustColor(index2Color(fieldMatrix[pos[0] * 2 + fieldSize][pos[1] * 2 + fieldSize]), 70 * k / snakeMatrix.length);
 			}
-			//document.getElementById(cellId(pref, ys * 2 + FS, xs * 2 + FS)).bgColor = adjustColor(document.getElementById(cellId(pref, ys * 2 + FS, xs * 2 + FS)).bgColor, 20);
+			let [optymalY, optymalX] = snakeMatrix[snakeMatrix.length - 1];
+			optymalY = optymalY * 2 + fieldSize;
+			optymalX = optymalX * 2 + fieldSize;
+			if (optymalMatrix.some(item => item[0] === optymalY + 1 && item[1] === optymalX)) {
+				if (blickMatrix.some(item => item[0] === optymalY + 1 && item[1] === optymalX) == false) {
+					fnBlick(optymalY + 1 + (FS - fieldSize), optymalX + (FS - fieldSize));
+				}
+			}
+			if (optymalMatrix.some(item => item[0] === optymalY - 1 && item[1] === optymalX)) {
+				if (blickMatrix.some(item => item[0] === optymalY - 1 && item[1] === optymalX) == false) {
+					fnBlick(optymalY - 1 + (FS - fieldSize), optymalX + (FS - fieldSize));
+				}
+			}
+			if (optymalMatrix.some(item => item[0] === optymalY && item[1] === optymalX + 1)) {
+				if (blickMatrix.some(item => item[0] === optymalY && item[1] === optymalX + 1) == false) {
+					fnBlick(optymalY + (FS - fieldSize), optymalX + 1 + (FS - fieldSize));
+				}
+			}
+			if (optymalMatrix.some(item => item[0] === optymalY && item[1] === optymalX - 1)) {
+				if (blickMatrix.some(item => item[0] === optymalY && item[1] === optymalX - 1) == false) {
+					fnBlick(optymalY + (FS - fieldSize), optymalX - 1 + (FS - fieldSize));
+				}
+			}
+			blickMatrix.push([optymalY + 1, optymalX]);
+			blickMatrix.push([optymalY - 1, optymalX]);
+			blickMatrix.push([optymalY, optymalX + 1]);
+			blickMatrix.push([optymalY, optymalX - 1]);
+			blickMatrix = blickMatrix.slice(-N * 30);// очищення
 			is++;
-			await delay(120);
+			await delay(delayMs);
 			if (N > 0) {
 				fnSnakeII(deltaY, deltaX);
 			}
@@ -1081,6 +1129,7 @@
 					writeHtml(0);
 				}
 			}
+			bounceTable();
 		}
 
 		function createCoordX(fs) {
@@ -1107,6 +1156,12 @@
 			}
 			html.push('</TABLE>');
 			return html.join('');
+		}
+
+		function bounceTable() {
+			const table = document.getElementById('vartab');
+			table.classList.add('bounce');
+			setTimeout(() => table.classList.remove('bounce'), 500);
 		}
 
 	</script>
@@ -1143,11 +1198,33 @@
 			margin: 0;
 			padding: 0;
 		}
+
+		@keyframes bounce {
+			0% {
+				transform: translateY(0);
+			}
+
+			20% {
+				transform: translateY(-20px);
+			}
+
+			40% {
+				transform: translateY(0);
+			}
+
+			100% {
+				transform: translateY(0);
+			}
+		}
+
+		.bounce {
+			animation: bounce 0.5s;
+		}
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">17</span></h1>
-	<table border=0 cellSpacing=0 cellPadding=0>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">18</span></h1>
+	<table border=0 cellSpacing=0 cellPadding=0 id="maintable">
 		<tr>
 			<td></td>
 			<td id="column1">
@@ -1173,6 +1250,8 @@
 						</td>
 						<td valign="top" width="0px">
 							<div id="textingL"></div>
+							<input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"
+								style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">
 						</td>
 					</tr>
 				</table>
