@@ -779,9 +779,11 @@
 			document.getElementById(textingId).innerHTML += '<br>The goal is to get more squares of your color to move to a higher level and board size.';
 			document.getElementById(textingId).innerHTML += `<hr>Click on the gray square <input type="button" value="1" onclick="roboColor('vartab')" id="grayBtn" style="width: 30px; height: 30px; font-size: 24px;background-color:#eee; border:none;"> to toggle the robot on/off.`;
 			document.getElementById(textingId).innerHTML += `<br>White square <input type="button" value=" " onclick="robot(0)" id="whiteBtn" style="width: 30px; height: 30px; font-size: 24px; background-color:#fff;"> in the upper right corner - robot progress.`;
-			document.getElementById(textingId).innerHTML += `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint<br>`;
-			document.getElementById(textingId).innerHTML += `<br><input type="button" value="S" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - A wise snake that crawls through a maze and finds successful moves<br>`;
-			document.getElementById(textingId).innerHTML += `<br><input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game<br>`;
+			document.getElementById(textingId).innerHTML += `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint`;
+			document.getElementById(textingId).innerHTML += `<br><input type="button" value="S" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - A wise snake that crawls through a maze and finds successful moves`;
+			document.getElementById(textingId).innerHTML += `<br><input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game`;
+			document.getElementById(textingId).innerHTML += `<br><input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
+
 		}
 		// Function to create the display area for the game
 		function createDisplOne(fs) {
@@ -847,18 +849,21 @@
 
 		let cYX = [], xs = 1, ys = 1, is = 0;
 
-		let snakeMatrix = [], N;
+		let snakeMatrix = [], N, M;
 
 		async function fnSnake() {
-			N = 7;
+			N = 7; M = N;
 			snake = (snake == 0) ? 1 : 0;
 			blickMatrix = [];
-			fnSnakeII(0, 1);
+			if (snake != 0) {
+				fnSnakeII(0, 1);
+			}
 		}
 
 		async function fnSnakeII(deltaYold, deltaXold) {
 			let deltaY = 0, deltaX = 0, delayMs = 120;
-			if (snake == 0) { N = N - 1; }
+			//if (snake == 0) { N = N - 1; }
+			//if (snake != 0) { M = 0; }
 			if (is == 0) { xs = 0; ys = 0; snakeMatrix = []; deltaY = 0; deltaX = 1; }
 			else {
 				let stepMatrixOver = [];
@@ -965,8 +970,7 @@
 							for (let k = 0; k < fieldSize; k++) {
 								const val = fieldMatrix[j * 2 + 1][k * 2 + 1];
 								if (!((j * 2 + 1) === 1 && (k * 2 + 1) === 1)) {
-									if (val === firstColorIndex || val === secondColorIndex) { a++; } else {
-									}
+									if (val === firstColorIndex || val === secondColorIndex) { a++; }
 								}
 							}
 						}
@@ -993,53 +997,58 @@
 
 			}
 			snakeMatrix.push([ys, xs]);
-			if (snakeMatrix.length > N) {
-				let old = snakeMatrix[0];
-				await delay(snake == 0 ? delayMs / 6 : 0);
-				document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
-				old = snakeMatrix[1];
-				await delay(snake == 0 ? delayMs / 6 : 0);
-				document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
-				old = snakeMatrix[2];
-				await delay(snake == 0 ? delayMs / 6 : 0);
-				document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
-			}
+			//if (snakeMatrix.length > N) {
+			//let old = snakeMatrix[0];
+			//await delay(snake == 0 ? delayMs / 6 : 0);
+			//document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
+			//old = snakeMatrix[1];
+			//await delay(snake == 0 ? delayMs / 6 : 0);
+			//document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
+			//old = snakeMatrix[2];
+			//await delay(snake == 0 ? delayMs / 6 : 0);
+			//document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
+			//}
 			snakeMatrix = snakeMatrix.slice(-N);
+
 			for (let k = 0; k < snakeMatrix.length; k++) {
 				let pos = snakeMatrix[k];
-				document.getElementById(cellId(pref, pos[1] * 2 + FS, pos[0] * 2 + FS)).bgColor = adjustColor(index2Color(fieldMatrix[pos[0] * 2 + fieldSize][pos[1] * 2 + fieldSize]), 70 * k / snakeMatrix.length);
-			}
-			let [optymalY, optymalX] = snakeMatrix[snakeMatrix.length - 1];
-			optymalY = optymalY * 2 + fieldSize;
-			optymalX = optymalX * 2 + fieldSize;
-			if (optymalMatrix.some(item => item[0] === optymalY + 1 && item[1] === optymalX)) {
-				if (blickMatrix.some(item => item[0] === optymalY + 1 && item[1] === optymalX) == false) {
-					fnBlick(optymalY + 1 + (FS - fieldSize), optymalX + (FS - fieldSize));
+				if (k < M) {
+					document.getElementById(cellId(pref, pos[1] * 2 + FS, pos[0] * 2 + FS)).bgColor = adjustColor(index2Color(fieldMatrix[pos[0] * 2 + fieldSize][pos[1] * 2 + fieldSize]), 70 * k / snakeMatrix.length);
 				}
 			}
-			if (optymalMatrix.some(item => item[0] === optymalY - 1 && item[1] === optymalX)) {
-				if (blickMatrix.some(item => item[0] === optymalY - 1 && item[1] === optymalX) == false) {
-					fnBlick(optymalY - 1 + (FS - fieldSize), optymalX + (FS - fieldSize));
+			if (snake == 0) { M--; } else {
+				let [optymalY, optymalX] = snakeMatrix[snakeMatrix.length - 1];
+				optymalY = optymalY * 2 + fieldSize;
+				optymalX = optymalX * 2 + fieldSize;
+				if (optymalMatrix.some(item => item[0] === optymalY + 1 && item[1] === optymalX)) {
+					if (blickMatrix.some(item => item[0] === optymalY + 1 && item[1] === optymalX) == false) {
+						fnBlick(optymalY + 1 + (FS - fieldSize), optymalX + (FS - fieldSize));
+					}
 				}
-			}
-			if (optymalMatrix.some(item => item[0] === optymalY && item[1] === optymalX + 1)) {
-				if (blickMatrix.some(item => item[0] === optymalY && item[1] === optymalX + 1) == false) {
-					fnBlick(optymalY + (FS - fieldSize), optymalX + 1 + (FS - fieldSize));
+				if (optymalMatrix.some(item => item[0] === optymalY - 1 && item[1] === optymalX)) {
+					if (blickMatrix.some(item => item[0] === optymalY - 1 && item[1] === optymalX) == false) {
+						fnBlick(optymalY - 1 + (FS - fieldSize), optymalX + (FS - fieldSize));
+					}
 				}
-			}
-			if (optymalMatrix.some(item => item[0] === optymalY && item[1] === optymalX - 1)) {
-				if (blickMatrix.some(item => item[0] === optymalY && item[1] === optymalX - 1) == false) {
-					fnBlick(optymalY + (FS - fieldSize), optymalX - 1 + (FS - fieldSize));
+				if (optymalMatrix.some(item => item[0] === optymalY && item[1] === optymalX + 1)) {
+					if (blickMatrix.some(item => item[0] === optymalY && item[1] === optymalX + 1) == false) {
+						fnBlick(optymalY + (FS - fieldSize), optymalX + 1 + (FS - fieldSize));
+					}
 				}
+				if (optymalMatrix.some(item => item[0] === optymalY && item[1] === optymalX - 1)) {
+					if (blickMatrix.some(item => item[0] === optymalY && item[1] === optymalX - 1) == false) {
+						fnBlick(optymalY + (FS - fieldSize), optymalX - 1 + (FS - fieldSize));
+					}
+				}
+				blickMatrix.push([optymalY + 1, optymalX]);
+				blickMatrix.push([optymalY - 1, optymalX]);
+				blickMatrix.push([optymalY, optymalX + 1]);
+				blickMatrix.push([optymalY, optymalX - 1]);
+				blickMatrix = blickMatrix.slice(-N * 30);// очищення
 			}
-			blickMatrix.push([optymalY + 1, optymalX]);
-			blickMatrix.push([optymalY - 1, optymalX]);
-			blickMatrix.push([optymalY, optymalX + 1]);
-			blickMatrix.push([optymalY, optymalX - 1]);
-			blickMatrix = blickMatrix.slice(-N * 30);// очищення
 			is++;
 			await delay(delayMs);
-			if (N > 0) {
+			if (M > 0) {
 				fnSnakeII(deltaY, deltaX);
 			}
 		}
@@ -1078,7 +1087,9 @@
 
 		function fnQuery() { robot(1); }// Call the robot function with query = 1
 
-		function fnAuto() {
+		async function fnAuto() {
+			bounceTable();
+			await delay(1000);
 			if (gameOver == 1) { fnNewGame(); }
 			roboSwitch = 0;
 			document.getElementById(grayCellId).bgColor = roboSwitch == 1 ? index2Color(0) : index2Color(2);
@@ -1105,6 +1116,7 @@
 		}
 
 		function fnNewGame() {
+			//bounceTable();
 			let id = cellId("v", "01", "01");
 			if (changeSize == 0) {
 				gameOver = 0;
@@ -1129,7 +1141,6 @@
 					writeHtml(0);
 				}
 			}
-			bounceTable();
 		}
 
 		function createCoordX(fs) {
@@ -1158,12 +1169,87 @@
 			return html.join('');
 		}
 
-		function bounceTable() {
-			const table = document.getElementById('vartab');
-			table.classList.add('bounce');
-			setTimeout(() => table.classList.remove('bounce'), 500);
-		}
+		//function bounceTable() {
+		//	const table = document.getElementById('vartab');
+		//	table.classList.add('bounce');
+		//	setTimeout(() => table.classList.remove('bounce'), 5000);
+		//}
 
+		function bounceTable() {
+			const orig = document.getElementById('vartab');
+			const container = orig.parentNode;
+
+			if (document.getElementById('vartab-copy')) return;
+
+			// Зберігаємо розміри до зміни позиціонування
+			const origRect = orig.getBoundingClientRect();
+			const width = orig.offsetWidth + 'px';
+			const height = orig.offsetHeight + 'px';
+			const left = orig.offsetLeft + 'px';
+			const top = orig.offsetTop + 'px';
+
+			// Зберігаємо старі стилі контейнера
+			const prevMinWidth = container.style.minWidth;
+			const prevMinHeight = container.style.minHeight;
+			const prevWidth = container.style.width;
+			const prevHeight = container.style.height;
+
+			// Фіксуємо розмір контейнера на час анімації
+			container.style.minWidth = width;
+			container.style.minHeight = height;
+			container.style.width = width;
+			container.style.height = height;
+
+			// Клонування таблиці
+			const clone = orig.cloneNode(true);
+			clone.id = 'vartab-copy';
+			clone.style.position = 'absolute';
+			clone.style.top = top;
+			clone.style.left = left;
+			clone.style.width = width;
+			clone.style.height = height;
+			clone.style.opacity = '1';
+			clone.style.pointerEvents = 'none';
+			clone.style.zIndex = '0';
+
+			// Додаємо копію в контейнер
+			container.insertBefore(clone, orig);
+
+			// Робимо оригінал absolutely positioned для анімації
+			orig.style.position = 'absolute';
+			orig.style.zIndex = '1';
+			orig.style.left = left;
+			orig.style.top = (orig.offsetTop - orig.offsetHeight - 40) + 'px';
+			orig.style.width = width;
+			orig.style.height = height;
+			orig.style.transition = 'top 0.7s cubic-bezier(.68,-0.55,.27,1.55)';
+
+			setTimeout(() => {
+				orig.style.top = top;
+			}, 10);
+
+			setTimeout(() => {
+				orig.style.position = '';
+				orig.style.zIndex = '';
+				orig.style.left = '';
+				orig.style.top = '';
+				orig.style.width = '';
+				orig.style.height = '';
+				orig.style.transition = '';
+				if (clone) clone.remove();
+
+				// Повертаємо розміри контейнера назад ТІЛЬКИ якщо вони були задані!
+				if (prevMinWidth) container.style.minWidth = prevMinWidth;
+				if (prevMinHeight) container.style.minHeight = prevMinHeight;
+				if (prevWidth) container.style.width = prevWidth;
+				if (prevHeight) container.style.height = prevHeight;
+				// Якщо були порожні — залишаємо фіксовані розміри!
+
+				// Оновити таблицю!
+				orig.style.width = tableWidth + 'px';
+				orig.style.height = tableWidth + 'px';
+			}, 2000);
+		}
 	</script>
 
 	<style>
@@ -1201,15 +1287,19 @@
 
 		@keyframes bounce {
 			0% {
-				transform: translateY(0);
+				transform: translateY(-1000px);
 			}
 
 			20% {
-				transform: translateY(-20px);
+				transform: translateY(-50px);
 			}
 
-			40% {
-				transform: translateY(0);
+			60% {
+				transform: translateY(-10px);
+			}
+
+			70% {
+				transform: translateY(-5px);
 			}
 
 			100% {
@@ -1218,12 +1308,12 @@
 		}
 
 		.bounce {
-			animation: bounce 0.5s;
+			animation: bounce 5s;
 		}
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">18</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">19</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable">
 		<tr>
 			<td></td>
@@ -1236,7 +1326,9 @@
 				<div id="tv"></div>
 			</td>
 			<td valign="top">
-				<div id="tx"></div>
+				<div id="tx-container" style="position: relative; min-height: 10px;">
+					<div id="tx"></div>
+				</div>
 			</td>
 			<td rowspan="3" align="left" valign="top">
 				<div id="dyL"></div>
@@ -1250,8 +1342,6 @@
 						</td>
 						<td valign="top" width="0px">
 							<div id="textingL"></div>
-							<input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"
-								style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">
 						</td>
 					</tr>
 				</table>
