@@ -788,9 +788,8 @@
 			document.getElementById(textingId).innerHTML += `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint`;
 			document.getElementById(textingId).innerHTML += `<br><input type="button" value="S" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - A wise snake that crawls through a maze and finds successful moves`;
 			document.getElementById(textingId).innerHTML += `<br><input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game`;
-			//document.getElementById(textingId).innerHTML += `<br><img src="qrcode.gif" id="qrcodeImg" width="${cellWidth}" height="${cellWidth}" alt="QR Code">`;
-			//document.getElementById(textingId).innerHTML += `<br><input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
 			document.getElementById(textingId).innerHTML += `<br><img src="qrcode.gif" id="qrcodeImg" width="${cellWidth}" height="${cellWidth}" alt="QR Code">`;
+			document.getElementById(textingId).innerHTML += `<br><input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
 		}
 		// Function to create the display area for the game
 		function createDisplOne(fs) {
@@ -1083,7 +1082,7 @@
 
 		async function fnAuto() {
 			bounceTable();
-			await delay(1000);
+			await delay(2000);
 			if (gameOver == 1) { fnNewGame(); }
 			roboSwitch = 0;
 			document.getElementById(grayCellId).bgColor = roboSwitch == 1 ? index2Color(0) : index2Color(2);
@@ -1313,7 +1312,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">20</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">21</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable">
 		<tr>
 			<td></td>
