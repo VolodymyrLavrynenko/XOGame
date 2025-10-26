@@ -29,6 +29,7 @@
 		const width = window.innerWidth;
 		let linesWidth = 20;
 		let tableWidth = 1000;
+		let qrcodeWidth = 100;
 		let orientation = (window.innerWidth > window.innerHeight) ? "landscape" : "portrait";
 		let snake = 0;
 		let optymalMatrix = [];
@@ -766,12 +767,17 @@
 			bill(fs);
 			writeText()
 			document.getElementById("grayBtn").value = gameLevel;
+			//document.getElementById("qrcodeImg").width = document.getElementById(textingId).width;
+			//document.getElementById("qrcodeImg").height = document.getElementById("qrcodeImg").width;
+			document.getElementById("bottomTable").style.width = `${tableWidth}px`;
 		}
 
 		function writeText() {
 			let symbol = "&#9632"; // black square
-			let textingId;
-			textingId = orientation == "landscape" ? "textingL" : "texting";
+			let textingId = orientation == "landscape" ? "textingL" : "texting";
+			let cellId = orientation == "landscape" ? "textingCellL" : "textingCell";
+			let cell = document.getElementById(cellId);
+			let cellWidth = cell ? cell.offsetWidth : 100; // fallback
 			document.getElementById(textingId).innerHTML = `<span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(secondColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'robot' : 'second gamer'} color`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}; font-weight: bold;">${gameLevel}</span> is game level`;
@@ -782,8 +788,9 @@
 			document.getElementById(textingId).innerHTML += `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint`;
 			document.getElementById(textingId).innerHTML += `<br><input type="button" value="S" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - A wise snake that crawls through a maze and finds successful moves`;
 			document.getElementById(textingId).innerHTML += `<br><input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game`;
-			document.getElementById(textingId).innerHTML += `<br><input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
-
+			//document.getElementById(textingId).innerHTML += `<br><img src="qrcode.gif" id="qrcodeImg" width="${cellWidth}" height="${cellWidth}" alt="QR Code">`;
+			//document.getElementById(textingId).innerHTML += `<br><input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
+			document.getElementById(textingId).innerHTML += `<br><img src="qrcode.gif" id="qrcodeImg" width="${cellWidth}" height="${cellWidth}" alt="QR Code">`;
 		}
 		// Function to create the display area for the game
 		function createDisplOne(fs) {
@@ -862,8 +869,6 @@
 
 		async function fnSnakeII(deltaYold, deltaXold) {
 			let deltaY = 0, deltaX = 0, delayMs = 120;
-			//if (snake == 0) { N = N - 1; }
-			//if (snake != 0) { M = 0; }
 			if (is == 0) { xs = 0; ys = 0; snakeMatrix = []; deltaY = 0; deltaX = 1; }
 			else {
 				let stepMatrixOver = [];
@@ -997,17 +1002,6 @@
 
 			}
 			snakeMatrix.push([ys, xs]);
-			//if (snakeMatrix.length > N) {
-			//let old = snakeMatrix[0];
-			//await delay(snake == 0 ? delayMs / 6 : 0);
-			//document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
-			//old = snakeMatrix[1];
-			//await delay(snake == 0 ? delayMs / 6 : 0);
-			//document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
-			//old = snakeMatrix[2];
-			//await delay(snake == 0 ? delayMs / 6 : 0);
-			//document.getElementById(cellId(pref, old[1] * 2 + FS, old[0] * 2 + FS)).bgColor = index2Color(fieldMatrix[old[0] * 2 + fieldSize][old[1] * 2 + fieldSize]);
-			//}
 			snakeMatrix = snakeMatrix.slice(-N);
 
 			for (let k = 0; k < snakeMatrix.length; k++) {
@@ -1116,7 +1110,6 @@
 		}
 
 		function fnNewGame() {
-			//bounceTable();
 			let id = cellId("v", "01", "01");
 			if (changeSize == 0) {
 				gameOver = 0;
@@ -1168,12 +1161,6 @@
 			html.push('</TABLE>');
 			return html.join('');
 		}
-
-		//function bounceTable() {
-		//	const table = document.getElementById('vartab');
-		//	table.classList.add('bounce');
-		//	setTimeout(() => table.classList.remove('bounce'), 5000);
-		//}
 
 		function bounceTable() {
 			const orig = document.getElementById('vartab');
@@ -1310,10 +1297,23 @@
 		.bounce {
 			animation: bounce 5s;
 		}
+
+		#qrcodeImg {
+			width: 100%;
+			height: auto;
+			max-width: 2000px;
+			/* або бажане максимальне значення */
+			display: block;
+		}
+
+		#textingCellL,
+		#textingCell {
+			min-width: 100px;
+		}
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">19</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">20</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable">
 		<tr>
 			<td></td>
@@ -1340,8 +1340,9 @@
 								<div id="statL"></div>
 							</small>
 						</td>
-						<td valign="top" width="0px">
-							<div id="textingL"></div>
+						<td valign="top" width="0px" id="textingCellL">
+							<div id="textingL">
+							</div>
 						</td>
 					</tr>
 				</table>
@@ -1355,7 +1356,7 @@
 		</tr>
 		<tr>
 			<td colspan="3">
-				<table border=0 cellSpacing=0 cellPadding=1>
+				<table border=0 cellSpacing=0 cellPadding=1 id="bottomTable">
 					<tr>
 						<td valign="top" id="column3">
 							<div id="nt"></div>
@@ -1363,7 +1364,7 @@
 								<div id="stat"></div>
 							</small>
 						</td>
-						<td valign="top" width="150px">
+						<td valign="top" id="textingCell">
 							<div id="texting"></div>
 						</td>
 					</tr>
