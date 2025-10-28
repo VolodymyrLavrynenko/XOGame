@@ -34,6 +34,7 @@
 		let snake = 0;
 		let optymalMatrix = [];
 		let blickMatrix = [];
+		let colorPalette = 0;
 
 		function cellId(n, x, y) {
 			return n + String(y).padStart(2, '0') + String(x).padStart(2, '0');
@@ -44,11 +45,12 @@
 		}
 
 		function index2Color(index) {
+			colorPalette = Number(getValue("colorPalette", 0));
 			switch (index) {
 				case 0: return "#ffffff"; // white
 				case 1: return "#000000"; // black
-				case -1: return "#0000ff"; // blue
-				case -2: return "#ffff00"; // yellow
+				case -1: return colorPalette === 0 ? "#0000ff" : "#ff0000"; // blue/ red
+				case -2: return colorPalette === 0 ? "#ffff00" : "#00ff00"; // yellow/ green
 				case 2: return "#e0e0e0"; // gray
 				default: return "#ffffff";
 			}
@@ -772,13 +774,21 @@
 			document.getElementById("bottomTable").style.width = `${tableWidth}px`;
 		}
 
+		let cellWidth = 0;
+
 		function writeText() {
 			let symbol = "&#9632"; // black square
 			let textingId = orientation == "landscape" ? "textingL" : "texting";
 			let cellId = orientation == "landscape" ? "textingCellL" : "textingCell";
 			let cell = document.getElementById(cellId);
-			let cellWidth = cell ? cell.offsetWidth : 100; // fallback
-			document.getElementById(textingId).innerHTML = `<span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
+			let baseWidth = cell ? cell.offsetWidth : 100;
+			if (cellWidth == 0) {
+				cellWidth = orientation == "landscape" ? baseWidth * 2 : baseWidth * 2;
+			}
+
+			document.getElementById(textingId).innerHTML = `<img src="qrcode.gif" id="qrcodeImg" style="width:${cellWidth}px; height:${cellWidth}px" alt="QR Code" align="left">`;
+			document.getElementById(textingId).innerHTML += `<br>Changing the color palette <img src="${colorPalette == 0 ? 'xoxr.png' : 'xox.png'}" id="xoxpng" alt="Col" align="left" onclick="changeColorPalette()">`;
+			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(secondColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'robot' : 'second gamer'} color`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}; font-weight: bold;">${gameLevel}</span> is game level`;
 			document.getElementById(textingId).innerHTML += '<br>Try pressing <input type="button" value=">" onclick="fnAuto()" id="autoBtn1" style="width: 30px; height: 30px; font-size: 24px;"> to get started. The first moves will be automatic.';
@@ -788,9 +798,16 @@
 			document.getElementById(textingId).innerHTML += `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint`;
 			document.getElementById(textingId).innerHTML += `<br><input type="button" value="S" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - A wise snake that crawls through a maze and finds successful moves`;
 			document.getElementById(textingId).innerHTML += `<br><input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game`;
-			document.getElementById(textingId).innerHTML += `<br><img src="qrcode.gif" id="qrcodeImg" width="${cellWidth}" height="${cellWidth}" alt="QR Code">`;
-			document.getElementById(textingId).innerHTML += `<br><input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
+			document.getElementById(textingId).innerHTML += `<input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
+			//document.getElementById(textingId).innerHTML += `<br><img src="qrcode.gif" id="qrcodeImgI" style="width:${cellWidth}px; height:${cellWidth}px" alt="QR Code" align="left">`;
 		}
+
+		function changeColorPalette() {
+			colorPalette = colorPalette == 0 ? 1 : 0;
+			saveValue('colorPalette', colorPalette);
+			writeHtml(0);
+		}
+
 		// Function to create the display area for the game
 		function createDisplOne(fs) {
 			const dimen = fs * fs - ((fs - 1) / 2) * (((fs - 1) / 2) - 1) * 2;
@@ -1298,7 +1315,7 @@
 		}
 
 		#qrcodeImg {
-			width: 100%;
+			/*width: 100%;*/
 			height: auto;
 			max-width: 2000px;
 			/* або бажане максимальне значення */
@@ -1312,7 +1329,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">21</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">22</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable">
 		<tr>
 			<td></td>
