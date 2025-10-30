@@ -34,7 +34,7 @@
 		let snake = 0;
 		let optymalMatrix = [];
 		let blickMatrix = [];
-		let colorPalette = 0, darkMode = 0;
+		let colorPalette = 0, darkMode = 0, advanced = 0;
 
 		function cellId(n, x, y) {
 			return n + String(y).padStart(2, '0') + String(x).padStart(2, '0');
@@ -729,6 +729,7 @@
 
 		// Initial call to set up the game board
 		function writeHtml(change) {
+			advanced = Number(getValue("advanced", 0));
 			document.body.style.backgroundColor = index2Color(3);
 			document.body.style.color = index2Color(1);
 			lightGreenColor = darkMode === 0 ? "#f0fff0" : "#102010"; // light green
@@ -809,12 +810,13 @@
 			document.getElementById(textingId).innerHTML += '<br>Try pressing <input type="button" value=">" onclick="fnAuto()" id="autoBtn1" style="width: 30px; height: 30px; font-size: 24px;"> to get started. The first moves will be automatic.';
 			document.getElementById(textingId).innerHTML += '<br>The goal is to get more squares of your color to move to a higher level and board size.';
 			document.getElementById(textingId).innerHTML += `<br>${darkMode === 0 ? "Dark" : "Light"} mode <input type="button" value="${darkMode === 0 ? "&#9790" : "&#9728"};" onclick="fnDarkMode()" id="darkBtn" style="width: 30px; height: 30px; font-size: 24px;"> toggle.`;
-			document.getElementById(textingId).innerHTML += `<hr>Click on the gray square <input type="button" value="1" onclick="roboColor('vartab')" id="grayBtn" style="width: 30px; height: 30px; font-size: 24px;background-color:#eee; border:none;"> to toggle the robot on/off.`;
-			document.getElementById(textingId).innerHTML += `<br>${darkMode === 0 ? "White" : "Black"} square <input type="button" value=" " onclick="robot(0)" id="whiteBtn" style="width: 30px; height: 30px; font-size: 24px; background-color:#fff;"> in the upper right corner - robot progress.`;
-			document.getElementById(textingId).innerHTML += `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint`;
-			document.getElementById(textingId).innerHTML += `<br><input type="button" value="S" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - A wise snake that crawls through a maze and finds successful moves`;
-			document.getElementById(textingId).innerHTML += `<br><input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game`;
-			document.getElementById(textingId).innerHTML += `<input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
+			document.getElementById(textingId).innerHTML += `<hr>${advanced ? `Click on the gray square <input type="button" value="1" onclick="roboColor('vartab')" id="grayBtn" style="width: 30px; height: 30px; font-size: 24px;background-color:#eee; border:none;"> to toggle the robot on/off.` : ``}`;
+			document.getElementById(textingId).innerHTML += `${advanced ? `<br>${darkMode === 0 ? "White" : "Black"} square <input type="button" value=" " onclick="robot(0)" id="whiteBtn" style="width: 30px; height: 30px; font-size: 24px; background-color:#fff;"> in the upper right corner - robot progress.` : ``}`;
+			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint` : ``}`;
+			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="S" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - A wise snake that crawls through a maze and finds successful moves` : ``}`;
+			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game` : ``}`;
+			document.getElementById(textingId).innerHTML += `${advanced ? `<input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">` : ``}`;
+			document.getElementById(textingId).innerHTML += `${advanced ? "<br>Simple" : "Advanced"} <input type="button" onclick="fnAdvanced()" value=${advanced ? "&#9632;" : "&#9881;"} title="Advanced mode"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;"> mode for ${advanced ? "beginers" : "experienced players"}.`;
 			document.getElementById(textingId).style.color = index2Color(1);
 		}
 
@@ -1282,6 +1284,13 @@
 				orig.style.height = tableWidth + 'px';
 			}, 2000);
 		}
+
+		function fnAdvanced() {
+			advanced = (advanced == 0) ? 1 : 0;
+			saveValue('advanced', advanced);
+			writeHtml(0);
+		}
+
 	</script>
 
 	<style>
@@ -1358,7 +1367,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">24</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">25</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable">
 		<tr>
 			<td></td>
