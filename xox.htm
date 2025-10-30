@@ -57,6 +57,18 @@
 			}
 		}
 
+		function index2ColorLight(index) {
+			colorPalette = Number(getValue("colorPalette", 0));
+			switch (index) {
+				case 0: return "#ffffff"; // white 
+				case 1: return "#000000"; // black 
+				case -1: return colorPalette === 0 ? "#0000ff" : "#ff0000"; // blue/ red
+				case -2: return colorPalette === 0 ? "#ffff00" : "#00ff00"; // yellow/ green
+				case 2: return "#e0e0e0"; // gray
+				default: return "#ffffff"; // white 
+			}
+		}
+
 		function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 		function getCookie(name) {
@@ -98,7 +110,6 @@
 				writeMatrix();
 			} else {
 				localStorage.removeItem('fieldMatrix');
-				//bounceTable();
 			}
 		}
 
@@ -142,9 +153,9 @@
 			} else {
 				currentRow = `<tr>
 					<td align = center>${fs}</td>
-					<td bgcolor=${index2Color(col)} align = center><font color="${index2Color(f)}">${gameLevel}</font></td>
+					<td bgcolor=${index2Color(col)} align = center><font color="${index2ColorLight(f)}">${gameLevel}</font></td>
 					<td align = center>${a}</td>
-					<td align = center bgcolor=${index2Color(col)}><font color="${index2Color(f)}">${dif}</font></td>
+					<td align = center bgcolor=${index2Color(col)}><font color="${index2ColorLight(f)}">${dif}</font></td>
 					<td align = center>${b}</td>
 				</tr>`;
 				allVal = a - b;
@@ -159,13 +170,13 @@
 			let txt = `<table border=0 id="statTable">
         		<tr bgcolor="${index2Color(firstColorIndex)}"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
         		<tr>
-					<th style="font-size: ${gameLevel * 100}%; color: ${index2Color(firstColorIndex)}"rowspan="${his.length * 2 + 3}" valign = "top">${gameLevel}</th>
+					<th style="font-size: ${gameLevel * 100}%; color: ${index2ColorLight(firstColorIndex)}"rowspan="${his.length * 2 + 3}" valign = "top">${gameLevel}</th>
             		<th id="size">Size</th>
             		<th id="level">Level</th>
-            		<th bgcolor="${index2Color(firstColorIndex)}"><font color="${index2Color(f)}">${lon}</font></th>
+            		<th bgcolor="${index2Color(firstColorIndex)}"><font color="${index2ColorLight(f)}">${lon}</font></th>
            			<th id="all"></th>
             		<th bgcolor="${index2Color(secondColorIndex)}" align="center">
-						<font color="${index2Color(g)}">${fs > 7 ? (fs - 2) * (fs - 2) - (((fs - 2) - 1) / 2) * ((((fs - 2) - 1) / 2) - 1) * 2 : 0}</font>
+						<font color="${index2ColorLight(g)}">${fs > 7 ? (fs - 2) * (fs - 2) - (((fs - 2) - 1) / 2) * ((((fs - 2) - 1) / 2) - 1) * 2 : 0}</font>
 					</th>
         		</tr>
         		<tr bgcolor="${index2Color(2)}"><td></td><td></td><td></td><td></td><td></td></tr>
@@ -186,9 +197,9 @@
 				txt += `<tr bgcolor="${index2Color(2)}"><td></td><td></td><td></td><td></td><td></td></tr>
         		<tr>
             		<td align="center">${i[0]}</td>
-            		<td bgcolor="${index2Color(col)}" align="center"><font color="${index2Color(f)}">${i[1]}</font></td>
+            		<td bgcolor="${index2Color(col)}" align="center"><font color="${index2ColorLight(f)}">${i[1]}</font></td>
             		<td align="center">${i[2]}</td>
-            		<td bgcolor="${index2Color(col)}" align="center"><font color="${index2Color(f)}">${diff}</font></td>
+            		<td bgcolor="${index2Color(col)}" align="center"><font color="${index2ColorLight(f)}">${diff}</font></td>
             		<td align="center">${i[3]}</td>
         		</tr>`;
 			}
@@ -211,8 +222,8 @@
 				document.getElementById("level").bgColor = index2Color(secondColorIndex);
 				document.getElementById("size").bgColor = index2Color(secondColorIndex);
 				f = (secondColorIndex === -2) ? 1 : 0;
-				document.getElementById("level").innerHTML = `<font color="${index2Color(f)}">${document.getElementById("level").innerText}</font>`;
-				document.getElementById("size").innerHTML = `<font color="${index2Color(f)}">${document.getElementById("size").innerText}</font>`;
+				document.getElementById("level").innerHTML = `<font color="${index2ColorLight(f)}">${document.getElementById("level").innerText}</font>`;
+				document.getElementById("size").innerHTML = `<font color="${index2ColorLight(f)}">${document.getElementById("size").innerText}</font>`;
 				fontK = 0.5;
 			} else
 				if (allVal > lon) {
@@ -220,18 +231,19 @@
 					document.getElementById("level").bgColor = index2Color(firstColorIndex);
 					document.getElementById("size").bgColor = index2Color(firstColorIndex);
 					g = (firstColorIndex === -2) ? 1 : 0;
-					document.getElementById("level").innerHTML = `<font color="${index2Color(g)}">${document.getElementById("level").innerText}</font>`;
-					document.getElementById("size").innerHTML = `<font color="${index2Color(g)}">${document.getElementById("size").innerText}</font>`;
+					document.getElementById("level").innerHTML = `<font color="${index2ColorLight(g)}">${document.getElementById("level").innerText}</font>`;
+					document.getElementById("size").innerHTML = `<font color="${index2ColorLight(g)}">${document.getElementById("size").innerText}</font>`;
 					fontK = 3;
 				}
 
 			// Оновлення відображення all
 			f = (col == -1) ? 0 : 1;
 			const cell = document.getElementById("all");
-			cell.innerHTML = `<font color="${index2Color(f)}">${allValModule}</font>`;
+			cell.innerHTML = `<font color="${index2ColorLight(f)}">${allValModule}</font>`;
 			cell.bgColor = index2Color(col);
 			cell.style.fontSize = `${fontK * 100}%`;
 			changeSize = 0;
+			//document.getElementById("size").style.color = index2Color(1);
 		}
 
 		// Robot function to find and click on lines
@@ -333,6 +345,7 @@
 			if (query != 10) {
 				robot(10);
 			}
+			//document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
 		}
 
 		// Status function to display the rate and number of available lines
@@ -361,6 +374,8 @@
 
 		async function fnReNew(y, x) {
 			await delay(100);
+			document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
+
 		}
 
 		// Function to handle cell clicks
@@ -770,8 +785,6 @@
 			bill(fs);
 			writeText()
 			document.getElementById("grayBtn").value = gameLevel;
-			//document.getElementById("qrcodeImg").width = document.getElementById(textingId).width;
-			//document.getElementById("qrcodeImg").height = document.getElementById("qrcodeImg").width;
 			document.getElementById("bottomTable").style.width = `${tableWidth}px`;
 			document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
 		}
@@ -1345,7 +1358,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">23</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">24</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable">
 		<tr>
 			<td></td>
