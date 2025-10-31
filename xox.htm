@@ -784,7 +784,7 @@
 			robot(0);
 			bill(fs);
 			writeText()
-			document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
+			//document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
 			document.getElementById("grayBtn").value = gameLevel;
 			document.getElementById("bottomTable").style.width = `${tableWidth}px`;
 		}
@@ -817,6 +817,8 @@
 			document.getElementById(textingId).innerHTML += `<input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
 			document.getElementById(textingId).innerHTML += `<br>${advanced ? "Simple" : "Advanced"} <input type="button" onclick="fnAdvanced()" value=${advanced ? "&#9632;" : "&#9881;"} title="Advanced mode"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;"> mode for ${advanced ? "beginers" : "experienced players"}.`;
 			document.getElementById(textingId).style.color = index2Color(1);
+			const qr = document.getElementById('qrcodeImg');
+			if (qr) qr.style.filter = `invert(${darkMode})`;
 		}
 
 		function changeColorPalette() {
@@ -1129,9 +1131,15 @@
 		function fnQuery() { robot(1); }// Call the robot function with query = 1
 
 		async function fnAuto() {
+			if (gameOver == 1) {
+				fnNewGame();
+				await delay(100); // Дати DOM оновитися
+				fnAuto();         // Запустити автоматичні ходи вже у новій грі
+				return;
+			}
 			bounceTable();
 			await delay(2000);
-			if (gameOver == 1) { fnNewGame(); }
+			//if (gameOver == 1) { fnNewGame(); }
 			roboSwitch = 0;
 			document.getElementById(grayCellId).bgColor = roboSwitch == 1 ? index2Color(0) : index2Color(2);
 			robot(2);
@@ -1367,7 +1375,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">27</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">28</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable">
 		<tr>
 			<td></td>
@@ -1389,10 +1397,10 @@
 				<table border=0 cellSpacing=0 cellPadding=1>
 					<tr>
 						<td valign="top" id="column3L">
-							<div id="ntL"></div>
 							<small>
 								<div id="statL"></div>
 							</small>
+							<div id="ntL"></div>
 						</td>
 						<td valign="top" width="0px" id="textingCellL">
 							<div id="textingL">
@@ -1413,10 +1421,10 @@
 				<table border=0 cellSpacing=0 cellPadding=1 id="bottomTable">
 					<tr>
 						<td valign="top" id="column3">
-							<div id="nt"></div>
 							<small>
 								<div id="stat"></div>
 							</small>
+							<div id="nt"></div>
 						</td>
 						<td valign="top" id="textingCell">
 							<div id="texting"></div>
