@@ -345,7 +345,6 @@
 			if (query != 10) {
 				robot(10);
 			}
-			//document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
 		}
 
 		// Status function to display the rate and number of available lines
@@ -374,8 +373,6 @@
 
 		async function fnReNew(y, x) {
 			await delay(100);
-			document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
-
 		}
 
 		// Function to handle cell clicks
@@ -433,6 +430,7 @@
 			document.getElementById("grayBtn").value = gameLevel;
 			document.getElementById("grayBtn").style.backgroundColor =
 				roboSwitch === 1 ? index2Color(2) : index2Color(0);
+			//document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
 		}
 
 		// 
@@ -544,6 +542,7 @@
 
 		// Function to handle clicks on the game board
 		async function clickh(nam) {
+			document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
 			let y = parseInt(nam.substr(1, 2), 10);
 			let x = parseInt(nam.substr(3, 2), 10);
 			let X = x - FS + fieldSize;
@@ -689,33 +688,33 @@
 					td += ' onclick="';
 					// Призначаємо події
 					if (x == 1 && y == 1) { td += "colsel('" + pref + "0101')"; } // blue
-					else if (x == 3 && y == 1) { td += "fnChanger(2)"; }//+
-					else if (x == 1 && y == 3) { td += "fnChanger(-2)"; }//-
-					else if (x == FS * 2 - 1 && y == FS * 2 - 3) { td += "fnLevel(1)"; } //+
-					else if (x == FS * 2 - 3 && y == FS * 2 - 1) { td += "fnLevel(-1)"; } //-
-					else if (x == 3 && y == FS * 2 - 1) { td += "fnNewGame()"; } //#
+					else if (x == 3 && y == 1) { td += advanced ? "fnChanger(2)" : ""; }//+
+					else if (x == 1 && y == 3) { td += advanced ? "fnChanger(-2)" : ""; }//-
+					else if (x == FS * 2 - 1 && y == FS * 2 - 3) { td += advanced ? "fnLevel(1)" : ""; } //+
+					else if (x == FS * 2 - 3 && y == FS * 2 - 1) { td += advanced ? "fnLevel(-1)" : ""; } //-
+					else if (x == 3 && y == FS * 2 - 1) { td += advanced ? "fnNewGame()" : ""; } //#
 					else if (x == 1 && y == FS * 2 - 1) { td += "fnAuto()"; } //>
-					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += "fnQuery()"; }
-					else if (x == (2 * FS - 1) && y == 1) { td += "robot(0)"; }
-					else if (x == 2 * FS - 1 && y == 2 * FS - 1) { td += "roboColor('vartab')"; }
+					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += advanced ? "fnQuery()" : ""; }
+					else if (x == (2 * FS - 1) && y == 1) { td += advanced ? "robot(0)" : ""; }
+					else if (x == 2 * FS - 1 && y == 2 * FS - 1) { td += advanced ? "roboColor('vartab')" : ""; }
 					else if (ck == 1 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { td += "clickh('" + cellId(pref, x, y) + "')"; }
 					else if (ck != 2 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { matrixCell.push(cellId(pref, x, y)); }
-					else if (x == FS * 2 - 3 && y == 1) { td += "fnWorm()"; } //W
-					else if (x == FS * 2 - 1 && y == 3) { td += "fnSnake()"; } //S
+					else if (x == FS * 2 - 3 && y == 1) { td += advanced ? "fnWorm()" : ""; } //W
+					else if (x == FS * 2 - 1 && y == 3) { td += advanced ? "fnSnake()" : ""; } //S
 					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += "resetGame()"; }//R
 					td += '"';
 					td += ' align="center" valign="middle">';
 					// Символи
 					if ((x == 1 && y == 1)) { td += `<font color=${index2Color(0)}>${fs}</font>`; }
-					else if (x == 3 && y == 1) { td += "+"; }
-					else if (x == 1 && y == 3) { td += "-"; }
-					else if (x == FS * 2 - 1 && y == FS * 2 - 3) { td += "+"; }
-					else if (x == FS * 2 - 3 && y == FS * 2 - 1) { td += "-"; }
+					else if (x == 3 && y == 1) { td += advanced ? "+" : ""; }
+					else if (x == 1 && y == 3) { td += advanced ? "-" : ""; }
+					else if (x == FS * 2 - 1 && y == FS * 2 - 3) { td += advanced ? "+" : ""; }
+					else if (x == FS * 2 - 3 && y == FS * 2 - 1) { td += advanced ? "-" : ""; }
 					else if (x == 1 && y == FS * 2 - 1) { td += '>' }
-					else if (x == 3 && y == FS * 2 - 1) { td += '#' }
-					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += '?' }
-					else if (x == FS * 2 - 3 && y == 1) { td += 'W'; }
-					else if (x == FS * 2 - 1 && y == 3) { td += 'S'; }
+					else if (x == 3 && y == FS * 2 - 1) { td += advanced ? '#' : '' }
+					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += advanced ? '?' : '' }
+					else if (x == FS * 2 - 3 && y == 1) { td += advanced ? 'W' : ''; }
+					else if (x == FS * 2 - 1 && y == 3) { td += advanced ? 'S' : ''; }
 					else if (x == FS * 2 - 1 && y == FS * 2 - 1) { td += gameLevel; }
 					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += 'R' }
 					td += '</TD>';
@@ -785,9 +784,9 @@
 			robot(0);
 			bill(fs);
 			writeText()
+			document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
 			document.getElementById("grayBtn").value = gameLevel;
 			document.getElementById("bottomTable").style.width = `${tableWidth}px`;
-			document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
 		}
 
 		let cellWidth = 0;
@@ -814,9 +813,9 @@
 			document.getElementById(textingId).innerHTML += `${advanced ? `<br>${darkMode === 0 ? "White" : "Black"} square <input type="button" value=" " onclick="robot(0)" id="whiteBtn" style="width: 30px; height: 30px; font-size: 24px; background-color:#fff;"> in the upper right corner - robot progress.` : ``}`;
 			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint` : ``}`;
 			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="S" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - A wise snake that crawls through a maze and finds successful moves` : ``}`;
-			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game` : ``}`;
-			document.getElementById(textingId).innerHTML += `${advanced ? `<input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">` : ``}`;
-			document.getElementById(textingId).innerHTML += `${advanced ? "<br>Simple" : "Advanced"} <input type="button" onclick="fnAdvanced()" value=${advanced ? "&#9632;" : "&#9881;"} title="Advanced mode"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;"> mode for ${advanced ? "beginers" : "experienced players"}.`;
+			document.getElementById(textingId).innerHTML += `${advanced ? `<br>` : ``}<input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game`;
+			document.getElementById(textingId).innerHTML += `<input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
+			document.getElementById(textingId).innerHTML += `<br>${advanced ? "Simple" : "Advanced"} <input type="button" onclick="fnAdvanced()" value=${advanced ? "&#9632;" : "&#9881;"} title="Advanced mode"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;"> mode for ${advanced ? "beginers" : "experienced players"}.`;
 			document.getElementById(textingId).style.color = index2Color(1);
 		}
 
@@ -837,6 +836,7 @@
 			document.getElementById('statL').style.color = index2Color(1);
 			document.getElementById('coordtabX').style.color = index2Color(1);
 			document.getElementById('coordtabY').style.color = index2Color(1);
+			//document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
 		}
 
 		// Function to create the display area for the game
@@ -1194,7 +1194,7 @@
 			}
 			html.push('</TR>');
 			html.push('</TABLE>');
-			return html.join('');
+			return advanced ? html.join('') : '';
 		}
 
 		function createCoordY(fs) {
@@ -1206,7 +1206,7 @@
 				html.push('</TD></TR>');
 			}
 			html.push('</TABLE>');
-			return html.join('');
+			return advanced ? html.join('') : '';
 		}
 
 		function bounceTable() {
@@ -1367,7 +1367,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">25</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">26</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable">
 		<tr>
 			<td></td>
