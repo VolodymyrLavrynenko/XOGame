@@ -1130,16 +1130,31 @@
 
 		function fnQuery() { robot(1); }// Call the robot function with query = 1
 
+		//async function fnAuto() {
+		//	if (gameOver == 1) {
+		//		fnNewGame();
+		//		await delay(300); // Дати DOM оновитися
+		//		fnAuto();         // Запустити автоматичні ходи вже у новій грі
+		//		return;
+		//	}
+		//	bounceTable();
+		//	await delay(2000);
+		//	//if (gameOver == 1) { fnNewGame(); }
+		//	roboSwitch = 0;
+		//	document.getElementById(grayCellId).bgColor = roboSwitch == 1 ? index2Color(0) : index2Color(2);
+		//	robot(2);
+		//}
 		async function fnAuto() {
 			if (gameOver == 1) {
+				bounceTable();
+				await delay(2000); // Чекаємо завершення анімації (час має відповідати bounceTable)
 				fnNewGame();
-				await delay(300); // Дати DOM оновитися
-				fnAuto();         // Запустити автоматичні ходи вже у новій грі
+				await delay(200);   // Дати DOM оновитися (можна збільшити до 100-150 при потребі)
+				fnAuto();          // Запускаємо автоматичні ходи вже у новій грі
 				return;
 			}
-			bounceTable();
-			await delay(2000);
-			//if (gameOver == 1) { fnNewGame(); }
+			//bounceTable();
+			await delay(300);
 			roboSwitch = 0;
 			document.getElementById(grayCellId).bgColor = roboSwitch == 1 ? index2Color(0) : index2Color(2);
 			robot(2);
