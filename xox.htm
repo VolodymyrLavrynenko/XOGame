@@ -789,7 +789,7 @@
 			document.getElementById("bottomTable").style.width = `${tableWidth}px`;
 		}
 
-		let cellWidth = 0;
+		let cellWidthQ = 0;
 
 		function writeText() {
 			let symbol = "&#9632"; // black square
@@ -797,19 +797,21 @@
 			let cellId = orientation == "landscape" ? "textingCellL" : "textingCell";
 			let cell = document.getElementById(cellId);
 			let baseWidth = cell ? cell.offsetWidth : 100;
-			if (cellWidth == 0) {
-				cellWidth = orientation == "landscape" ? baseWidth * 2 : baseWidth * 2;
+			if (cellWidthQ == 0) {
+				cellWidthQ = orientation == "landscape" ? baseWidth * 2 : baseWidth * 1;
 			}
-
-			document.getElementById(textingId).innerHTML = `<img src="qrcode.gif" id="qrcodeImg" style="width:${cellWidth}px; height:${cellWidth}px" alt="QR Code" align="left">`;
-			document.getElementById(textingId).innerHTML += `<br>Changing the color palette <img src="${colorPalette == 0 ? 'xoxr.png' : 'xox.png'}" id="xoxpng" alt="Col" align="left" onclick="changeColorPalette()">`;
+			//alert(baseWidth);
+			document.getElementById(textingId).innerHTML = `<img src="qrcode.gif" id="qrcodeImg" style="width:${cellWidthQ}px; height:${cellWidthQ}px" alt="QR Code" align="left">`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(secondColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'robot' : 'second gamer'} color`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}; font-weight: bold;">${gameLevel}</span> is game level`;
+			//document.getElementById(textingId).innerHTML += '<br>';
+			//document.getElementById(textingId).innerHTML += '<br>';
 			document.getElementById(textingId).innerHTML += '<br>Try pressing <input type="button" value=">" onclick="fnAuto()" id="autoBtn1" style="width: 30px; height: 30px; font-size: 24px;"> to get started. The first moves will be automatic.';
 			document.getElementById(textingId).innerHTML += '<br>The goal is to get more squares of your color to move to a higher level and board size.';
 			document.getElementById(textingId).innerHTML += `<br>${darkMode === 0 ? "Dark" : "Light"} mode <input type="button" value="${darkMode === 0 ? "&#9790" : "&#9728"};" onclick="fnDarkMode()" id="darkBtn" style="width: 30px; height: 30px; font-size: 24px;"> toggle.`;
-			document.getElementById(textingId).innerHTML += `<hr>${advanced ? `Click on the gray square <input type="button" value="1" onclick="roboColor('vartab')" id="grayBtn" style="width: 30px; height: 30px; font-size: 24px;background-color:#eee; border:none;"> to toggle the robot on/off.` : ``}`;
+			document.getElementById(textingId).innerHTML += `<hr>`;
+			document.getElementById(textingId).innerHTML += `${advanced ? `Click on the gray square <input type="button" value="1" onclick="roboColor('vartab')" id="grayBtn" style="width: 30px; height: 30px; font-size: 24px;background-color:#eee; border:none;"> to toggle the robot on/off.` : ``}`;
 			document.getElementById(textingId).innerHTML += `${advanced ? `<br>${darkMode === 0 ? "White" : "Black"} square <input type="button" value=" " onclick="robot(0)" id="whiteBtn" style="width: 30px; height: 30px; font-size: 24px; background-color:#fff;"> in the upper right corner - robot progress.` : ``}`;
 			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint` : ``}`;
 			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="S" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - A wise snake that crawls through a maze and finds successful moves` : ``}`;
@@ -1147,7 +1149,7 @@
 		async function fnAuto() {
 			if (gameOver == 1) {
 				bounceTable();
-				await delay(2000); // Чекаємо завершення анімації (час має відповідати bounceTable)
+				await delay(2010); // Чекаємо завершення анімації (час має відповідати bounceTable)
 				fnNewGame();
 				await delay(200);   // Дати DOM оновитися (можна збільшити до 100-150 при потребі)
 				fnAuto();          // Запускаємо автоматичні ходи вже у новій грі
@@ -1327,7 +1329,8 @@
 			/* Базовий розмір шрифту */
 			/*font-family: Arial, sans-serif;*/
 			/* Ваш шрифт */
-			background: #fff;
+			/*background: #fff;*/
+			background: #000;
 		}
 
 		/* Скидання для заголовків */
@@ -1375,23 +1378,37 @@
 			animation: bounce 5s;
 		}
 
-		#qrcodeImg {
-			/*width: 100%;*/
-			height: auto;
-			max-width: 2000px;
-			/* або бажане максимальне значення */
-			display: block;
-		}
-
 		#textingCellL,
 		#textingCell {
 			min-width: 100px;
 		}
+
+		/*#textingCell,
+		#texting {
+			max-width: 100vw;
+			width: 100vw;
+			box-sizing: border-box;
+			overflow-wrap: break-word;
+			word-break: break-word;
+			white-space: normal;
+		}*/
+
+		/*#qrcodeImg {
+			max-width: 100%;
+			height: auto;
+			display: block;
+		}*/
+
+		/*#bottomTable {
+			max-width: 100vw;
+			width: 100vw;
+			table-layout: fixed;
+		}*/
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">30</span></h1>
-	<table border=0 cellSpacing=0 cellPadding=0 id="maintable">
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">31</span></h1>
+	<table border=0 cellSpacing=0 cellPadding=0 id="maintable" width="100%">
 		<tr>
 			<td></td>
 			<td id="column1">
@@ -1418,7 +1435,7 @@
 							<div id="ntL"></div>
 						</td>
 						<td valign="top" width="0px" id="textingCellL">
-							<div id="textingL">
+							<div id="textingL" style="max-width: 3000px;">
 							</div>
 						</td>
 					</tr>
