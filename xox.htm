@@ -10,7 +10,7 @@
 	<link rel="icon" type="image/png" href="xox.png">
 </HEAD>
 
-<BODY>
+<BODY id="body">
 	<script language=javascript>
 
 		let fieldSize = 7;// 7 - 9 - 11
@@ -53,6 +53,7 @@
 				case -1: return colorPalette === 0 ? "#0000ff" : "#ff0000"; // blue/ red
 				case -2: return colorPalette === 0 ? "#ffff00" : "#00ff00"; // yellow/ green
 				case 2: return darkMode === 0 ? "#e0e0e0" : "#202020"; // gray
+				case 10: return darkMode === 0 ? "#f0fff0" : "#102010"; // light green / dark green
 				default: return darkMode === 0 ? "#ffffff" : "#000000"; // white / black
 			}
 		}
@@ -427,9 +428,11 @@
 				roboSwitch === 1 ? index2Color(2) : index2Color(0);
 			saveValue('roboSwitch', roboSwitch);
 			writeText();
-			document.getElementById("grayBtn").value = gameLevel;
-			document.getElementById("grayBtn").style.backgroundColor =
-				roboSwitch === 1 ? index2Color(2) : index2Color(0);
+			if (advanced) {
+				document.getElementById("grayBtn").value = gameLevel;
+				document.getElementById("grayBtn").style.backgroundColor =
+					roboSwitch === 1 ? index2Color(2) : index2Color(0);
+			}
 			//document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
 		}
 
@@ -729,9 +732,10 @@
 		// Initial call to set up the game board
 		function writeHtml(change) {
 			advanced = Number(getValue("advanced", 0));
-			document.body.style.backgroundColor = index2Color(3);
+			document.body.style.backgroundColor = index2Color(0);
 			document.body.style.color = index2Color(1);
-			lightGreenColor = darkMode === 0 ? "#f0fff0" : "#102010"; // light green
+			//lightGreenColor = darkMode === 0 ? "#f0fff0" : "#102010"; // light green
+			lightGreenColor = index2Color(10); // light green
 			tableWidth = Math.min(window.innerWidth, window.innerHeight) * 0.95;
 			FS = Number(getValue("FS", 7));
 			roboSwitch = Number(getValue("roboSwitch", roboSwitch));
@@ -743,9 +747,9 @@
 			document.getElementById("column1").style.width = `${24 * FS + 20}px`;
 
 			// Оновлення ігрового поля
-			document.getElementById("tc").innerHTML = createCoordX(fs);
-			document.getElementById("tv").innerHTML = createCoordY(fs);
-			document.getElementById("tx").innerHTML = createHtml(fs, FS, change);
+			document.getElementById("tc").innerHTML = createCoordX(fs);//X axis
+			document.getElementById("tv").innerHTML = createCoordY(fs);//Y axis
+			document.getElementById("tx").innerHTML = createHtml(fs, FS, change);//Game Board
 
 			displText(0, 0);
 			grayCellId = cellId(pref, FS * 2 - 1, FS * 2 - 1);
@@ -785,7 +789,9 @@
 			bill(fs);
 			writeText()
 			//document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
-			document.getElementById("grayBtn").value = gameLevel;
+			if (advanced) {
+				document.getElementById("grayBtn").value = gameLevel;
+			}
 			document.getElementById("bottomTable").style.width = `${tableWidth}px`;
 		}
 
@@ -802,6 +808,7 @@
 			}
 			//alert(baseWidth);
 			document.getElementById(textingId).innerHTML = `<img src="qrcode.gif" id="qrcodeImg" style="width:${cellWidthQ}px; height:${cellWidthQ}px" alt="QR Code" align="left">`;
+			document.getElementById(textingId).innerHTML += `<br>Changing the color palette <img src="${colorPalette == 0 ? 'xoxr.png' : 'xox.png'}" id="xoxpng" alt="Col" align="left" onclick="changeColorPalette()">`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(secondColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'robot' : 'second gamer'} color`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}; font-weight: bold;">${gameLevel}</span> is game level`;
@@ -840,6 +847,7 @@
 			document.getElementById('statL').style.color = index2Color(1);
 			document.getElementById('coordtabX').style.color = index2Color(1);
 			document.getElementById('coordtabY').style.color = index2Color(1);
+			//document.body.style.backgroundColor = index2Color(0);
 			//document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
 		}
 
@@ -1149,14 +1157,14 @@
 		async function fnAuto() {
 			if (gameOver == 1) {
 				bounceTable();
-				await delay(2010); // Чекаємо завершення анімації (час має відповідати bounceTable)
+				await delay(2000); // Чекаємо завершення анімації (час має відповідати bounceTable)
 				fnNewGame();
-				await delay(200);   // Дати DOM оновитися (можна збільшити до 100-150 при потребі)
+				await delay(150);   // Дати DOM оновитися (можна збільшити до 100-150 при потребі)
 				fnAuto();          // Запускаємо автоматичні ходи вже у новій грі
 				return;
 			}
 			//bounceTable();
-			await delay(300);
+			await delay(200);
 			roboSwitch = 0;
 			document.getElementById(grayCellId).bgColor = roboSwitch == 1 ? index2Color(0) : index2Color(2);
 			robot(2);
@@ -1407,23 +1415,22 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">31</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">32</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable" width="100%">
 		<tr>
 			<td></td>
 			<td id="column1">
-				<div id="tc"></div>
+				<div id="tc"></div><!-- X Container -->
 			</td>
 		</tr>
 		<tr>
 			<td valign="top">
-				<div id="tv"></div>
+				<div id="tv"></div><!-- Y Container -->
 			</td>
 			<td valign="top">
 				<div id="tx-container" style="position: relative; min-height: 10px;">
-					<div id="tx"></div>
+					<div id="tx"></div><!-- Game Board Container -->
 				</div>
-			</td>
 			<td rowspan="3" align="left" valign="top">
 				<div id="dyL"></div>
 				<table border=0 cellSpacing=0 cellPadding=1>
