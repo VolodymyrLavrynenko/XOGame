@@ -36,6 +36,10 @@
 		let blickMatrix = [];
 		let colorPalette = 0, darkMode = 0, advanced = 0;
 
+		window.addEventListener('resize', () => {
+			writeHtml(0);
+		});
+
 		function cellId(n, x, y) {
 			return n + String(y).padStart(2, '0') + String(x).padStart(2, '0');
 		}
@@ -730,6 +734,20 @@
 			return html.join('');
 		}
 
+		function getTableWidth() {
+			// Враховуємо висоту dy (індикатора рахунку)
+			let dyHeight = 0;
+			const dyElem = document.getElementById("dy");
+			if (dyElem) {
+				dyHeight = dyElem.offsetHeight || 60;
+			}
+			const bottomMargin = 10;
+			// Вираховуємо доступну висоту для поля
+			let availableHeight = window.innerHeight - dyHeight - bottomMargin;
+			// Вибираємо мінімум з ширини і доступної висоти
+			return Math.floor(Math.min(window.innerWidth, availableHeight) * 0.95);
+		}
+
 		// Initial call to set up the game board
 		function writeHtml(change) {
 			advanced = Number(getValue("advanced", 0));
@@ -741,21 +759,22 @@
 
 
 
-			// Додаємо захист для мобільних пристроїв
-			let dyHeight = 0;
-			const dyElem = document.getElementById("dy");
-			if (dyElem) {
-				dyHeight = dyElem.offsetHeight || 60; // 60px — запас, якщо ще не відмальовано
-			}
+			//// Додаємо захист для мобільних пристроїв
+			//let dyHeight = 0;
+			//const dyElem = document.getElementById("dy");
+			//if (dyElem) {
+			//	dyHeight = dyElem.offsetHeight || 60; // 60px — запас, якщо ще не відмальовано
+			//}
 			// Мінімальний відступ знизу (наприклад, 10px)
-			const bottomMargin = 10;
+			////const bottomMargin = 10;
 
-			// Вираховуємо доступну висоту для поля
-			let availableHeight = window.innerHeight - dyHeight - bottomMargin;
-			// Вибираємо мінімум з ширини і доступної висоти
-			tableWidth = Math.min(window.innerWidth, availableHeight) * 0.95;
+			//// Вираховуємо доступну висоту для поля
+			//let availableHeight = window.innerHeight - dyHeight - bottomMargin;
+			//// Вибираємо мінімум з ширини і доступної висоти
+			//tableWidth = Math.min(window.innerWidth, availableHeight) * 0.95;
 
 
+			tableWidth = getTableWidth();
 
 
 
@@ -1169,6 +1188,7 @@
 				await delay(2000); // Чекаємо завершення анімації (час має відповідати bounceTable)
 				fnNewGame();
 				await delay(150);   // Дати DOM оновитися (можна збільшити до 100-150 при потребі)
+				writeHtml(0);
 				fnAuto();          // Запускаємо автоматичні ходи вже у новій грі
 				return;
 			}
@@ -1402,6 +1422,7 @@
 			min-width: 100px;
 		}
 
+
 		#tx-container,
 		#vartab {
 			max-width: 98vw;
@@ -1421,7 +1442,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">38</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">39</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable" width="100%">
 		<tr>
 			<td></td>
