@@ -1,4 +1,5 @@
-<HTML>
+<!DOCTYPE html>
+<HTML lang="en">
 
 <HEAD>
 	<meta name=vs_targetSchema content="HTML 4.0">
@@ -8,8 +9,6 @@
 	<META HTTP-EQUIV="Content-Type" content="text/html">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="icon" type="image/png" href="xox.png">
-	<!DOCTYPE html>
-	<html lang="en">
 </HEAD>
 
 <BODY id="body">
@@ -383,6 +382,9 @@
 
 		async function fnReNew(y, x) {
 			await delay(100);
+			//document.body.style.color = index2Color(1);// 
+			//document.getElementById("textingL").style.color = "#ffffff";
+			//document.body.style.color = "#ffffff";
 		}
 
 		// Function to handle cell clicks
@@ -754,7 +756,7 @@
 		function writeHtml(change) {
 			advanced = Number(getValue("advanced", 0));
 			//document.body.style.backgroundColor = index2Color(0);
-			document.body.style.color = index2Color(1);
+			//document.body.style.color = index2Color(1);
 			lightGreenColor = index2Color(10); // light green
 			darkGreenColor = index2Color(11); // dark green
 			//tableWidth = Math.min(window.innerWidth, window.innerHeight) * 0.95;
@@ -830,6 +832,7 @@
 			});
 			if (his.length > 0) { firstColorSet(); }
 			document.body.style.backgroundColor = index2Color(0);
+			document.body.style.color = index2Color(1);
 			//alert(index2Color(-1));
 			robot(0);
 			bill(fs);
@@ -840,6 +843,10 @@
 			document.getElementById("bottomTable").style.width = `${tableWidth}px`;
 			document.getElementById('tx-container').style.height = `${tableWidth}px`;
 			document.getElementById('tx-container').style.width = `${tableWidth}px`;
+			//document.getElementById("textingL").style.color = "#000000";
+			document.body.style.color = "#fff";
+			document.body.style.color = index2Color(1);
+
 		}
 
 		let cellWidthQ = 0;
@@ -869,7 +876,9 @@
 			document.getElementById(textingId).innerHTML += `${advanced ? `<br>` : ``}<input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game`;
 			document.getElementById(textingId).innerHTML += `<input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
 			document.getElementById(textingId).innerHTML += `<br>${advanced ? "Simple" : "Advanced"} <input type="button" onclick="fnAdvanced()" value=${advanced ? "&#9632;" : "&#9881;"} title="Advanced mode"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;"> mode for ${advanced ? "beginers" : "experienced players"}.`;
-			document.getElementById(textingId).style.color = index2Color(1);
+			//document.getElementById(textingId).style.color = index2Color(1);
+			//document.getElementById("textingL").style.color = index2Color(1);
+
 			const qr = document.getElementById('qrcodeImg');
 			if (qr) qr.style.filter = `invert(${darkMode})`; // Adjust QR code for dark mode
 		}
@@ -890,11 +899,15 @@
 			document.getElementById('stat').style.color = index2Color(1);
 			document.getElementById('statL').style.color = index2Color(1);
 			//document.body.style.backgroundColor = index2Color(1);
+			//document.body.style.color = index2Color(0);
 			if (advanced) {
 				document.getElementById('coordtabX').style.color = index2Color(1);
 				document.getElementById('coordtabY').style.color = index2Color(1);
 			}
 			//document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
+			document.body.style.color = "#fff";
+			document.body.style.color = index2Color(1);
+
 		}
 
 		// Function to create the display area for the game
@@ -1275,6 +1288,8 @@
 		}
 
 		function bounceTable() {
+			document.body.style.color = "#fff";
+			document.body.style.color = index2Color(1);
 			const orig = document.getElementById('vartab');
 			const container = orig.parentNode;
 
@@ -1348,6 +1363,10 @@
 				orig.style.width = tableWidth + 'px';
 				orig.style.height = tableWidth + 'px';
 			}, 2000);
+			//document.body.style.color = "#fff";
+			//alert(document.body.style.color);
+			//document.body.style.color = index2Color(1);
+			//alert(document.body.style.color);
 		}
 
 		function fnAdvanced() {
@@ -1443,7 +1462,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">45</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">46</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable" width="100%">
 		<tr>
 			<td></td>
