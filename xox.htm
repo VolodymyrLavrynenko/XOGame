@@ -156,6 +156,8 @@
 			let currentRow = "";
 			if (a + b == lon) {
 				gameOver = 1;
+				//alert('Game Over!');
+				bounceTable();
 				his.push([fieldSize, gameLevel, a, b]);
 				saveHis();
 				localStorage.removeItem('roboSwitch');
@@ -477,7 +479,7 @@
 			if (roboSwitch === 1) await robot(0);
 			if (gameOver == 0) {
 				bill(fieldSize);
-			}
+			} //else (alert('Game Over!'));
 		}
 
 		// Function to get the neighbors of a cell in the matrix
@@ -884,12 +886,18 @@
 		}
 
 		function changeColorPalette() {
+			if (gameOver === 1) {
+				return;
+			}
 			colorPalette = colorPalette == 0 ? 1 : 0;
 			saveValue('colorPalette', colorPalette);
 			writeHtml(0);
 		}
 
 		function fnDarkMode() {
+			if (gameOver === 1) {
+				return;
+			}
 			darkMode = darkMode == 0 ? 1 : 0;
 			saveValue('darkMode', darkMode);
 			writeHtml(0);
@@ -1201,8 +1209,8 @@
 
 		async function fnAuto() {
 			if (gameOver == 1) {
-				bounceTable();
-				await delay(2000); // Чекаємо завершення анімації (час має відповідати bounceTable)
+				//bounceTable();
+				//await delay(2000); // Чекаємо завершення анімації (час має відповідати bounceTable)
 				fnNewGame();
 				await delay(150);   // Дати DOM оновитися (можна збільшити до 100-150 при потребі)
 				writeHtml(0);
@@ -1370,9 +1378,11 @@
 		}
 
 		function fnAdvanced() {
-			advanced = (advanced == 0) ? 1 : 0;
-			saveValue('advanced', advanced);
-			writeHtml(0);
+			if (gameOver == 0) {
+				advanced = (advanced == 0) ? 1 : 0;
+				saveValue('advanced', advanced);
+				writeHtml(0);
+			}
 		}
 
 	</script>
@@ -1462,7 +1472,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">46</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">47</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable" width="100%">
 		<tr>
 			<td></td>
