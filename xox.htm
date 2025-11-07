@@ -144,16 +144,24 @@
 			let symbolClear = "&#9633"; // clear square
 			symbol = "&#9632"// bflack square
 			let dyId = orientation === "landscape" ? "dyL" : "dy";
+			let scaleWidth = tableWidth;
 			//const KDimention = 2.46;
 			const KDimention = 2.5;
 			document.getElementById(dyId).innerHTML = `<table border=0 cellSpacing=0 cellPadding=0 id="dyTable">
 						<tr>
-							<td style="width: ${tableWidth}px; font-size: ${tableWidth * KDimention / ((fieldSize + 1) * (fieldSize + 1))}; word-break: break-all;"><span style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span><span>${symbolClear.repeat(lon - a - b)}</span><span style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span></td>
+							<td style="width: ${tableWidth}px; font-size: ${tableWidth * KDimention / ((fieldSize + 1) * (fieldSize + 1))}; word-break: break-all;"><span id="scale00" style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span><span id="scale01">${symbolClear.repeat(lon - a - b)}</span><span id="scale02" style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span></td>
 						</tr>
 						<tr>
-							<td style="width: ${tableWidth}px; font-size: ${tableWidth * KDimention / ((fieldSize + 1) * (fieldSize + 1))}; word-break: break-all;"><span style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span><span>${symbolClear.repeat(lon - a - b)}</span><span style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span></td>
+							<td style="width: ${tableWidth}px; font-size: ${tableWidth * KDimention / ((fieldSize + 1) * (fieldSize + 1))}; word-break: break-all;"><span id="scale10" style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span><span id="scale11">${symbolClear.repeat(lon - a - b)}</span><span id="scale12" style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span></td>
 						</tr>
 					</table>`;
+			document.getElementById('scale00').style.fontSize = scaleWidth * KDimention / ((fieldSize + 1) * (fieldSize + 1)) + 'px';
+			document.getElementById('scale01').style.fontSize = document.getElementById('scale00').style.fontSize;
+			document.getElementById('scale02').style.fontSize = document.getElementById('scale01').style.fontSize;
+			document.getElementById('scale10').style.fontSize = document.getElementById('scale02').style.fontSize;
+			document.getElementById('scale11').style.fontSize = document.getElementById('scale10').style.fontSize;
+			document.getElementById('scale12').style.fontSize = document.getElementById('scale11').style.fontSize;
+			//alert(document.getElementById('scale1').style.fontSize);
 		}
 
 		function displOne(a, b) {
@@ -799,11 +807,7 @@
 			//// Вибираємо мінімум з ширини і доступної висоти
 			//tableWidth = Math.min(window.innerWidth, availableHeight) * 0.95;
 
-
 			tableWidth = getTableWidth();
-
-
-
 
 			FS = Number(getValue("FS", 7));
 			roboSwitch = Number(getValue("roboSwitch", roboSwitch));
@@ -868,7 +872,6 @@
 			//document.getElementById("textingL").style.color = "#000000";
 			document.body.style.color = "#fff";
 			document.body.style.color = index2Color(1);
-
 		}
 
 		let cellWidthQ = 0;
@@ -1526,7 +1529,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">48</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">49</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable" width="100%">
 		<tr>
 			<td></td>
