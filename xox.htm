@@ -35,7 +35,25 @@
 		let snake = 0;
 		let optymalMatrix = [];
 		let blickMatrix = [];
-		let colorPalette = 0, darkMode = 0, advanced = 0;
+		let colorPalette = 0, darkMode = 0, advanced = 0, fullScreen = document.fullscreenElement != null;
+
+		document.addEventListener('fullscreenchange', handleFullscreenChange);
+		document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Для Safari 
+		document.addEventListener('msfullscreenchange', handleFullscreenChange); // Для IE/Edge 
+
+		function handleFullscreenChange(event) {
+			// Перевіряємо, чи сторінка ПЕРЕБУВАЄ в повноекранному режимі 
+			if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || document.mozFullScreenElement) {
+				// Сторінка у Full screen 
+				console.log('Повноекранний режим активовано! 🚀'); // Тут можна оновити іконку кнопки на 'Вихід' 
+				//alert('Повноекранний режим активовано! 🚀');
+				fullScreen = true;
+			} else { // Сторінка вийшла зі Full screen 
+				console.log('Повноекранний режим деактивовано. 👋'); // Тут можна оновити іконку кнопки на 'Вхід' 
+				//alert('Повноекранний режим деактивовано. 👋');
+				fullScreen = false;
+			}
+		}
 
 		window.addEventListener('resize', () => {
 			writeHtml(0);
@@ -724,11 +742,13 @@
 					else if (x == 1 && y == 3) { td += advanced ? "-" : ""; }
 					else if (x == FS * 2 - 1 && y == FS * 2 - 3) { td += advanced ? "+" : ""; }
 					else if (x == FS * 2 - 3 && y == FS * 2 - 1) { td += advanced ? "-" : ""; }
-					else if (x == 1 && y == FS * 2 - 1) { td += '>' }
-					else if (x == 3 && y == FS * 2 - 1) { td += advanced ? '#' : '' }
-					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += advanced ? '?' : '' }
-					else if (x == FS * 2 - 3 && y == 1) { td += advanced ? 'W' : ''; }
-					else if (x == FS * 2 - 1 && y == 3) { td += advanced ? 'S' : ''; }
+					else if (x == 1 && y == FS * 2 - 1) { td += '&#9654' }//>
+					else if (x == 3 && y == FS * 2 - 1) { td += advanced ? '&#8862' : '' }//#
+					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += advanced ? '&#128161' : '' }//?
+					//else if (x == (2 * FS - 1) && y == 1) { td += advanced ? '🤖' : ''; }
+					//else if (x == 2 * FS - 1 && y == 2 * FS - 1) { td += advanced ? (roboSwitch === 1 ? '🟢' : '⚪') : ''; }
+					else if (x == FS * 2 - 3 && y == 1) { td += advanced ? '🪱' : ''; }//W
+					else if (x == FS * 2 - 1 && y == 3) { td += advanced ? '&#128013' : ''; }//S
 					else if (x == FS * 2 - 1 && y == FS * 2 - 1) { td += gameLevel; }
 					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += 'R' }
 					td += '</TD>';
@@ -867,14 +887,17 @@
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(secondColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'robot' : 'second gamer'} color`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}; font-weight: bold;">${gameLevel}</span> is game level`;
-			document.getElementById(textingId).innerHTML += '<br>Try pressing <input type="button" value=">" onclick="fnAuto()" id="autoBtn1" style="width: 30px; height: 30px; font-size: 24px;"> to get started. The first moves will be automatic.';
+			document.getElementById(textingId).innerHTML += '<br>Try pressing <input type="button" value="&#9654" onclick="fnAuto()" id="autoBtn1" style="width: 30px; height: 30px; font-size: 24px;"> to get started. The first moves will be automatic.';
 			document.getElementById(textingId).innerHTML += '<br>The goal is to get more squares of your color to move to a higher level and board size.';
 			document.getElementById(textingId).innerHTML += `<br>${darkMode === 0 ? "Dark" : "Light"} mode <input type="button" value="${darkMode === 0 ? "&#9790" : "&#9728"};" onclick="fnDarkMode()" id="darkBtn" style="width: 30px; height: 30px; font-size: 24px;"> toggle.`;
+			document.getElementById(textingId).innerHTML += `<br>${fullScreen ? "Exit " : ""}Full screen <input type="button" onclick="fnFullScreen()" value=${fullScreen ? "&#8658;" : "&#9974;"} title="Full screen mode" style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;"> mode.`;
 			document.getElementById(textingId).innerHTML += `<hr>`;
 			document.getElementById(textingId).innerHTML += `${advanced ? `Click on the gray square <input type="button" value="1" onclick="roboColor('vartab')" id="grayBtn" style="width: 30px; height: 30px; font-size: 24px;background-color:#eee; border:none;"> to toggle the robot on/off.` : ``}`;
 			document.getElementById(textingId).innerHTML += `${advanced ? `<br>${darkMode === 0 ? "White" : "Black"} square <input type="button" value=" " onclick="robot(0)" id="whiteBtn" style="width: 30px; height: 30px; font-size: 24px; background-color:#fff;"> in the upper right corner - robot progress.` : ``}`;
-			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="?" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint` : ``}`;
-			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="S" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - A wise snake that crawls through a maze and finds successful moves` : ``}`;
+			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="&#128161" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint` : ``}`;
+			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="🪱" onclick="fnWorm()" id="wormBtn" style="width: 30px; height: 30px; font-size: 24px;"> - The worm` : ``}`;
+			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="&#128013" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - The wise snake that crawls through a maze and finds successful moves` : ``}`;
+			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="&#8862" onclick="fnNewGame()" id="newGameBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Clear field` : ``}`;
 			document.getElementById(textingId).innerHTML += `${advanced ? `<br>` : ``}<input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game`;
 			document.getElementById(textingId).innerHTML += `<input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
 			document.getElementById(textingId).innerHTML += `<br>${advanced ? "Simple" : "Advanced"} <input type="button" onclick="fnAdvanced()" value=${advanced ? "&#9632;" : "&#9881;"} title="Advanced mode"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;"> mode for ${advanced ? "beginers" : "experienced players"}.`;
@@ -1385,6 +1408,37 @@
 			}
 		}
 
+		function fnFullScreen() {
+			//alert(document.fullscreenElement != null);
+			fullScreen = (document.fullscreenElement == null) ? 1 : 0;
+			if (fullScreen == 1) {
+				openFullscreen();
+			} else {
+				closeFullscreen();
+			}
+		}
+
+		function openFullscreen() {
+			const elem = document.documentElement; if (elem.requestFullscreen) {
+				elem.requestFullscreen();
+			} else if (elem.webkitRequestFullscreen) { /* Safari */
+				elem.webkitRequestFullscreen();
+			} else if (elem.msRequestFullscreen) { /* IE11 */
+				elem.msRequestFullscreen();
+			}
+		} // Зазвичай викликається після кліка користувача: document.getElementById("fullscreen-button").addEventListener("click", openFullscreen);
+
+		function closeFullscreen() {
+			if (document.exitFullscreen) {
+				document.exitFullscreen();
+			} else if (document.webkitExitFullscreen) { /* Safari */
+				document.webkitExitFullscreen();
+			} else if (document.msExitFullscreen) { /* IE11 */
+				document.msExitFullscreen();
+			}
+		} // Зазвичай викликається після кліка користувача: document.getElementById("exit-fullscreen-button").addEventListener("click", closeFullscreen);
+
+
 	</script>
 
 	<style>
@@ -1472,7 +1526,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">47</span></h1>
+			style="font-weight: normal;">Game</span><span style="font-size: 10px;">48</span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable" width="100%">
 		<tr>
 			<td></td>
