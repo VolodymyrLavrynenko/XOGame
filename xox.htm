@@ -14,6 +14,7 @@
 <BODY id="body">
 	<script language=javascript>
 
+		const ver = 51;
 		let fieldSize = 7;// 7 - 9 - 11
 		let FS = fieldSize;
 		let gameLevel = 1; // 0 - hight level, 1 - easy, 2 - medium, 3 - hard
@@ -41,11 +42,13 @@
 		document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Для Safari 
 		document.addEventListener('msfullscreenchange', handleFullscreenChange); // Для IE/Edge 
 		document.addEventListener('mozfullscreenchange', handleFullscreenChange); // Для Firefox
-		document.addEventListener("orientationchange", function () {
-			//alert('Orientation changed to ' + orientation);
-			orientation = (window.innerWidth > window.innerHeight) ? "landscape" : "portrait";
-			writeHtml(0);
-		}, false);
+		let resizeTimeout;
+		window.addEventListener("resize", () => {
+			clearTimeout(resizeTimeout);
+			resizeTimeout = setTimeout(() => {
+				window.location.reload(true);
+			}, 300);
+		});
 
 		function handleFullscreenChange(event) {
 			// Перевіряємо, чи сторінка ПЕРЕБУВАЄ в повноекранному режимі 
@@ -878,6 +881,7 @@
 			//document.getElementById("textingL").style.color = "#000000";
 			document.body.style.color = "#fff";
 			document.body.style.color = index2Color(1);
+			document.getElementById('gameVersion').innerText = ver;
 		}
 
 		let cellWidthQ = 0;
@@ -1535,7 +1539,7 @@
 	</style>
 	<!-- Insert HTML here -->
 	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span style="font-size: 10px;">50</span></h1>
+			style="font-weight: normal;">Game</span><span id="gameVersion" style="font-size: 10px;"></span></h1>
 	<table border=0 cellSpacing=0 cellPadding=0 id="maintable" width="100%">
 		<tr>
 			<td></td>
