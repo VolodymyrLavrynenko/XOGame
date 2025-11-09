@@ -14,7 +14,7 @@
 <BODY id="body">
 	<script language=javascript>
 
-		const ver = 52;
+		const ver = 53;
 		let fieldSize = 7;// 7 - 9 - 11
 		let FS = fieldSize;
 		let gameLevel = 1; // 0 - hight level, 1 - easy, 2 - medium, 3 - hard
@@ -37,16 +37,23 @@
 		let optymalMatrix = [];
 		let blickMatrix = [];
 		let colorPalette = 0, darkMode = 0, advanced = 0, fullScreen = document.fullscreenElement != null;
+		let fullScreenOld = fullScreen;
 
 		document.addEventListener('fullscreenchange', handleFullscreenChange);
 		document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Для Safari 
 		document.addEventListener('msfullscreenchange', handleFullscreenChange); // Для IE/Edge 
 		document.addEventListener('mozfullscreenchange', handleFullscreenChange); // Для Firefox
+
 		let resizeTimeout;
 		window.addEventListener("resize", () => {
 			clearTimeout(resizeTimeout);
 			resizeTimeout = setTimeout(() => {
-				window.location.reload();
+				let orientationNew = (window.innerWidth > window.innerHeight) ? "landscape" : "portrait";
+				if (orientationNew !== orientation || fullScreen !== fullScreenOld/*|| changeSize === 1*/) {
+					orientation = orientationNew;
+					writeHtml(0);
+				}
+				fullScreenOld = fullScreen;
 			}, 1000);
 		});
 
@@ -62,11 +69,8 @@
 				//alert('Повноекранний режим деактивовано. 👋');
 				fullScreen = false;
 			}
+			//writeHtml(0);
 		}
-
-		window.addEventListener('resize', () => {
-			writeHtml(0);
-		});
 
 		function cellId(n, x, y) {
 			return n + String(y).padStart(2, '0') + String(x).padStart(2, '0');
@@ -153,6 +157,7 @@
 			let symbolClear = "&#9633"; // clear square
 			symbol = "&#9632"// bflack square
 			let dyId = orientation === "landscape" ? "dyL" : "dy";
+			let dyIdNull = orientation === "landscape" ? "dy" : "dyL";
 			let scaleWidth = tableWidth;
 			//const KDimention = 2.46;
 			const KDimention = 2.5;
@@ -170,6 +175,7 @@
 			document.getElementById('scale10').style.fontSize = document.getElementById('scale02').style.fontSize;
 			document.getElementById('scale11').style.fontSize = document.getElementById('scale10').style.fontSize;
 			document.getElementById('scale12').style.fontSize = document.getElementById('scale11').style.fontSize;
+			document.getElementById(dyIdNull).innerHTML = "";
 			//alert(document.getElementById('scale1').style.fontSize);
 		}
 
@@ -251,7 +257,9 @@
 			}
 			txt += `<tr bgcolor="${index2Color(2)}"><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>`;
 			let ntId = orientation === "landscape" ? "ntL" : "nt";
+			let ntIdNull = orientation === "landscape" ? "nt" : "ntL";
 			document.getElementById(ntId).innerHTML = txt;
+			document.getElementById(ntIdNull).innerHTML = "";
 
 			// Відображення загального рахунку
 			let allValModule = Math.abs(allVal);
@@ -397,6 +405,8 @@
 		function fnStatus(rateMin, filteredLength) {
 			let symbol = "&#9632"; // black square
 			let statId = orientation === "landscape" ? "statL" : "stat";
+			let statIdNull = orientation === "landscape" ? "stat" : "statL";
+			document.getElementById(statIdNull).innerHTML = "";
 			let rateCount = rateMin;
 			if (rateMin == 0) { symbol = "&#9633"; rateCount = 1; }// white square
 			if (rateCount <= 20) {
@@ -788,7 +798,7 @@
 			// Вираховуємо доступну висоту для поля
 			let availableHeight = window.innerHeight - dyHeight - bottomMargin;
 			// Вибираємо мінімум з ширини і доступної висоти
-			return Math.floor(Math.min(window.innerWidth, availableHeight) * 0.95);
+			return Math.floor(Math.min(window.innerWidth, availableHeight) * 1.0);
 		}
 
 		// Initial call to set up the game board
@@ -798,9 +808,6 @@
 			//document.body.style.color = index2Color(1);
 			lightGreenColor = index2Color(10); // light green
 			darkGreenColor = index2Color(11); // dark green
-			//tableWidth = Math.min(window.innerWidth, window.innerHeight) * 0.95;
-
-
 
 			//// Додаємо захист для мобільних пристроїв
 			//let dyHeight = 0;
@@ -825,11 +832,20 @@
 			gameLevel = Number(getValue('level', gameLevel));
 			getHis();
 			matrixCell = []; // Очищення
-			document.getElementById("column1").style.width = `${24 * FS + 20}px`;
 
 			// Оновлення ігрового поля
-			document.getElementById("tc").innerHTML = createCoordX(fs);//X axis
-			document.getElementById("tv").innerHTML = createCoordY(fs);//Y axis
+			let gameName, gameNameNull;
+			if (orientation == "landscape") {//landscape
+				gameName = "gameNameL";
+				gameNameNull = "gameNameP";
+			} else {
+				gameName = "gameNameP";
+				gameNameNull = "gameNameL";
+			}
+
+			document.getElementById("coordXcon").innerHTML = createCoordX(fs);//X axis
+			document.getElementById("coordXcon").width = `${tableWidth}px`;
+			document.getElementById("coordYcon").innerHTML = createCoordY(fs);//X axis
 			document.getElementById("tx").innerHTML = createHtml(fs, FS, change);//Game Board
 
 			displText(0, 0);
@@ -868,20 +884,19 @@
 			if (his.length > 0) { firstColorSet(); }
 			document.body.style.backgroundColor = index2Color(0);
 			document.body.style.color = index2Color(1);
-			//alert(index2Color(-1));
 			robot(0);
 			bill(fs);
 			writeText()
 			if (advanced) {
 				document.getElementById("grayBtn").value = gameLevel;
 			}
-			document.getElementById("bottomTable").style.width = `${tableWidth}px`;
 			document.getElementById('tx-container').style.height = `${tableWidth}px`;
 			document.getElementById('tx-container').style.width = `${tableWidth}px`;
-			//document.getElementById("textingL").style.color = "#000000";
 			document.body.style.color = "#fff";
 			document.body.style.color = index2Color(1);
-			document.getElementById('gameVersion').innerText = ver;
+			document.getElementById(gameName).innerHTML = `<h1 style="margin-bottom: 0em"><span style="color: ${index2Color(firstColorIndex)};">X</span><span style="color: ${index2Color(secondColorIndex)};">O</span><span
+			style="font-weight: normal;">Game</span><span id="gameVersionVal" style="font-size: 10px;">${ver}</span></h1>`
+			document.getElementById(gameNameNull).innerHTML = "";
 		}
 
 		let cellWidthQ = 0;
@@ -889,6 +904,8 @@
 		function writeText() {
 			let symbol = "&#9632"; // black square
 			let textingId = orientation == "landscape" ? "textingL" : "texting";
+			let textingIdNull = orientation == "landscape" ? "texting" : "textingL";
+			document.getElementById(textingIdNull).innerHTML = "";
 			let cellId = orientation == "landscape" ? "textingCellL" : "textingCell";
 			let cell = document.getElementById(cellId);
 			let baseWidth = cell ? cell.offsetWidth : 100;
@@ -914,8 +931,6 @@
 			document.getElementById(textingId).innerHTML += `${advanced ? `<br>` : ``}<input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game`;
 			document.getElementById(textingId).innerHTML += `<input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
 			document.getElementById(textingId).innerHTML += `<br>${advanced ? "Simple" : "Advanced"} <input type="button" onclick="fnAdvanced()" value=${advanced ? "&#9632;" : "&#9881;"} title="Advanced mode"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;"> mode for ${advanced ? "beginers" : "experienced players"}.`;
-			//document.getElementById(textingId).style.color = index2Color(1);
-			//document.getElementById("textingL").style.color = index2Color(1);
 
 			const qr = document.getElementById('qrcodeImg');
 			if (qr) qr.style.filter = `invert(${darkMode})`; // Adjust QR code for dark mode
@@ -942,8 +957,6 @@
 			document.getElementById('statTable').style.color = index2Color(1);
 			document.getElementById('stat').style.color = index2Color(1);
 			document.getElementById('statL').style.color = index2Color(1);
-			//document.body.style.backgroundColor = index2Color(1);
-			//document.body.style.color = index2Color(0);
 			if (advanced) {
 				document.getElementById('coordtabX').style.color = index2Color(1);
 				document.getElementById('coordtabY').style.color = index2Color(1);
@@ -1407,10 +1420,6 @@
 				orig.style.width = tableWidth + 'px';
 				orig.style.height = tableWidth + 'px';
 			}, 2000);
-			//document.body.style.color = "#fff";
-			//alert(document.body.style.color);
-			//document.body.style.color = index2Color(1);
-			//alert(document.body.style.color);
 		}
 
 		function fnAdvanced() {
@@ -1462,11 +1471,6 @@
 			padding: 0;
 			box-sizing: border-box;
 			font-size: 16px;
-			/* Базовий розмір шрифту */
-			/*font-family: Arial, sans-serif;*/
-			/* Ваш шрифт */
-			/*background: #fff;*/
-			/*background: #000;*/
 		}
 
 		/* Скидання для заголовків */
@@ -1518,86 +1522,68 @@
 		#textingCell {
 			min-width: 100px;
 		}
-
-
-		/*#tx-container,
-		#vartab {
-			max-width: 98vw;
-			max-height: 98vw;
-			box-sizing: border-box;
-			overflow: auto;
-		}*/
-
-		/*@media (max-width: 600px) {
-
-			#tx-container,
-			#vartab {
-				max-width: 98vw;
-				max-height: 98vh;
-			}
-		}*/
 	</style>
 	<!-- Insert HTML here -->
-	<h1 style="margin-bottom: 0em"><span style="color: #0000ff;">X</span><span style="color: #ffff00;">O</span><span
-			style="font-weight: normal;">Game</span><span id="gameVersion" style="font-size: 10px;"></span></h1>
-	<table border=0 cellSpacing=0 cellPadding=0 id="maintable" width="100%">
+	<div id="gameNameP"></div>
+	<table border="0" cellSpacing="0" cellPadding="0" id="uberTable">
 		<tr>
-			<td></td>
-			<td id="column1">
-				<div id="tc"></div><!-- X Container -->
-			</td>
-		</tr>
-		<tr>
-			<td valign="top">
-				<div id="tv"></div><!-- Y Container -->
-			</td>
-			<td valign="top">
-				<div id="tx-container" style="position: relative; min-height: 10px;">
-					<div id="tx"></div><!-- Game Board Container -->
+			<td align="left" valign="top">
+				<div id="gameBoardDiv">
+					<table border="0" cellSpacing="0" cellPadding="0">
+						<tr>
+							<td></td>
+							<td id="coordXcon" align="left" valign="top">
+							</td>
+						</tr>
+						<tr>
+							<td id="coordYcon" align="left" valign="top">
+							</td>
+							<td align="left" valign="top">
+								<div id="tx-container" style="position: relative; min-height: 10px;">
+									<div id="tx"></div><!-- Game Board Container -->
+								</div>
+							</td>
+						</tr>
+					</table>
 				</div>
-			<td rowspan="3" align="left" valign="top">
+			</td>
+			<td align="left" valign="top">
+				<div id="gameNameL"></div>
 				<div id="dyL"></div>
-				<table border=0 cellSpacing=0 cellPadding=1>
+				<small>
+					<div id="statL"></div>
+				</small>
+				<table>
 					<tr>
-						<td valign="top" id="column3L">
-							<small>
-								<div id="statL"></div>
-							</small>
+						<td valign="top">
 							<div id="ntL"></div>
 						</td>
-						<td valign="top" width="0px" id="textingCellL">
-							<div id="textingL" style="max-width: 3000px;">
-							</div>
+						<td valign="top">
+							<div id="textingL"></div>
 						</td>
 					</tr>
 				</table>
 			</td>
 		</tr>
 		<tr>
-			<td></td>
-			<td>
+			<td align="left" valign="top">
 				<div id="dy"></div>
-			</td>
-		</tr>
-		<tr>
-			<td colspan="3">
-				<table border=0 cellSpacing=0 cellPadding=1 id="bottomTable">
+				<small>
+					<div id="stat"></div>
+				</small>
+				<table>
 					<tr>
-						<td valign="top" id="column3">
-							<small>
-								<div id="stat"></div>
-							</small>
+						<td valign="top">
 							<div id="nt"></div>
 						</td>
-						<td valign="top" id="textingCell">
+						<td valign="top">
 							<div id="texting"></div>
 						</td>
 					</tr>
 				</table>
-				<!--<div id="ex"></div>-->
-				<!--<div id="displ"></div>-->
-				<!--<div id="histo"></div>-->
-
+			</td>
+			<td align="left" valign="top">
+				<div id="nullDiv"></div>
 			</td>
 		</tr>
 	</table>
