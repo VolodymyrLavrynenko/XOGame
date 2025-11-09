@@ -14,7 +14,7 @@
 <BODY id="body">
 	<script language=javascript>
 
-		const ver = 51;
+		const ver = 52;
 		let fieldSize = 7;// 7 - 9 - 11
 		let FS = fieldSize;
 		let gameLevel = 1; // 0 - hight level, 1 - easy, 2 - medium, 3 - hard
@@ -46,7 +46,7 @@
 		window.addEventListener("resize", () => {
 			clearTimeout(resizeTimeout);
 			resizeTimeout = setTimeout(() => {
-				window.location.reload(true);
+				window.location.reload();
 			}, 1000);
 		});
 
