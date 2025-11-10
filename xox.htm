@@ -14,7 +14,7 @@
 <BODY id="body">
 	<script language=javascript>
 
-		const ver = 53;
+		const ver = 54;
 		let fieldSize = 7;// 7 - 9 - 11
 		let FS = fieldSize;
 		let gameLevel = 1; // 0 - hight level, 1 - easy, 2 - medium, 3 - hard
@@ -897,6 +897,13 @@
 			document.getElementById(gameName).innerHTML = `<h1 style="margin-bottom: 0em"><span style="color: ${index2Color(firstColorIndex)};">X</span><span style="color: ${index2Color(secondColorIndex)};">O</span><span
 			style="font-weight: normal;">Game</span><span id="gameVersionVal" style="font-size: 10px;">${ver}</span></h1>`
 			document.getElementById(gameNameNull).innerHTML = "";
+			if (orientation == "landscape") {
+				document.getElementById("bannerL").style.visibility = "visible";
+				document.getElementById("bannerP").style.visibility = "hidden";
+			} else {
+				document.getElementById("bannerL").style.visibility = "hidden";
+				document.getElementById("bannerP").style.visibility = "visible";
+			}
 		}
 
 		let cellWidthQ = 0;
@@ -912,7 +919,11 @@
 			if (cellWidthQ == 0) {
 				cellWidthQ = orientation == "landscape" ? baseWidth * 2 : baseWidth * 1;
 			}
-			document.getElementById(textingId).innerHTML = `<img src="qrcode.gif" id="qrcodeImg" style="width:${cellWidthQ}px; height:${cellWidthQ}px" alt="QR Code" align="left">`;
+			let bannerTxt = "Play XOX Game - Fill the board with your color by completing squares. Challenge the robot and advance through levels!";
+			//document.getElementById("metaDescription").setAttribute("content", bannerTxt);
+			bannerTxt = ``;
+			document.getElementById(textingId).innerHTML = ``;
+			document.getElementById(textingId).innerHTML += `<img src="qrcode.gif" id="qrcodeImg" style="width:${cellWidthQ}px; height:${cellWidthQ}px" alt="QR Code" align="left">`;
 			document.getElementById(textingId).innerHTML += `<br>Changing the color palette <img src="${colorPalette == 0 ? 'xoxr.png' : 'xox.png'}" id="xoxpng" alt="Col" align="left" onclick="changeColorPalette()">`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
 			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(secondColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'robot' : 'second gamer'} color`;
@@ -1542,6 +1553,12 @@
 								<div id="tx-container" style="position: relative; min-height: 10px;">
 									<div id="tx"></div><!-- Game Board Container -->
 								</div>
+								<div id="bannerP">
+									<script
+										type="text/javascript"> atOptions = { 'key': '2d32bea01d3ff718aacc795d15ce79a3', 'format': 'iframe', 'height': 60, 'width': 468, 'params': {} }; </script>
+									<script type="text/javascript"
+										src="//www.highperformanceformat.com/2d32bea01d3ff718aacc795d15ce79a3/invoke.js"></script>
+								</div>
 							</td>
 						</tr>
 					</table>
@@ -1553,6 +1570,12 @@
 				<small>
 					<div id="statL"></div>
 				</small>
+				<div id="bannerL">
+					<script
+						type="text/javascript"> atOptions = { 'key': '2d32bea01d3ff718aacc795d15ce79a3', 'format': 'iframe', 'height': 60, 'width': 468, 'params': {} }; </script>
+					<script type="text/javascript"
+						src="//www.highperformanceformat.com/2d32bea01d3ff718aacc795d15ce79a3/invoke.js"></script>
+				</div>
 				<table>
 					<tr>
 						<td valign="top">
