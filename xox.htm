@@ -7,21 +7,30 @@
 	<TITLE>XOGame</TITLE>
 	<META NAME="GENERATOR" Content="Microsoft Visual Studio">
 	<META HTTP-EQUIV="Content-Type" content="text/html">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="icon" type="image/png" href="xox.png">
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
+	<link rel=" icon" type="image/png" href="xox.png">
+	<link rel="stylesheet"
+		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+	<script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
 </HEAD>
 
 <BODY id="body">
 	<script language=javascript>
 
-		const ver = 54;
+		const ver = 135; // version
+		const pro = 0; // 0 - free, 1 - pro
+		const desktop = 0; // 0 - off, 1 - on
+		const overlay = 1; // 0 - off, 1 - on
 		let fieldSize = 7;// 7 - 9 - 11
 		let FS = fieldSize;
 		let gameLevel = 1; // 0 - hight level, 1 - easy, 2 - medium, 3 - hard
+		let menuMap = 0; //
+		let manualDarkMode = 0; // 0 - off, 1 - on
 		let firstColorIndex = 0, secondColorIndex = 1, fieldMatrix = [], his = [];
 		let greenVar = 0, grayCellId;//
-		let newLevel = 0;
-		let gameColorIndex = -1, roboSwitch = 0, gameOver = 0, changeSize = 0;
+		let newLevel = 0, oldLevel = 0, autoMove = 0;
+		let gameColorIndex = -1, roboSwitch = 1, gameOver = 0, changeSize = 0;
 		let matrixCell = [];
 		let lightGreenColor, darkGreenColor;
 		const pref = "v", idTab = "vartab", delayTime = 1500;
@@ -29,8 +38,9 @@
 		date.setFullYear(date.getFullYear() + 1); // +1 рік від поточної дати
 		const expires = date.toUTCString();
 		const width = window.innerWidth;
+		const autoSymbol = "▶"; // play symbol "&#9654;"
 		let linesWidth = 20;
-		let tableWidth = 1000;
+		let tableWidth = 500;
 		let qrcodeWidth = 100;
 		let orientation = (window.innerWidth > window.innerHeight) ? "landscape" : "portrait";
 		let snake = 0;
@@ -38,11 +48,22 @@
 		let blickMatrix = [];
 		let colorPalette = 0, darkMode = 0, advanced = 0, fullScreen = document.fullscreenElement != null;
 		let fullScreenOld = fullScreen;
+		let autoVisible = 1;
+		let btn;
 
 		document.addEventListener('fullscreenchange', handleFullscreenChange);
 		document.addEventListener('webkitfullscreenchange', handleFullscreenChange); // Для Safari 
 		document.addEventListener('msfullscreenchange', handleFullscreenChange); // Для IE/Edge 
 		document.addEventListener('mozfullscreenchange', handleFullscreenChange); // Для Firefox
+		// Event listener to call writeHtml when the document is loaded
+		document.addEventListener('DOMContentLoaded', function () { writeHtml(10); });
+		// Перевіряти кожні 10 хвилин (600000 мс)
+		//setInterval(autoDarkModeBySun, 60000);
+		// Також одразу при старті
+		//autoDarkModeBySun();
+		// Перевіряти кожні 10 хвилин (600000 мс)
+		setInterval(autoDarkModeByTime, 600000);
+		//autoDarkModeByTime();
 
 		let resizeTimeout;
 		window.addEventListener("resize", () => {
@@ -119,14 +140,16 @@
 			document.getElementById("displ").innerHTML = document.cookie;
 		}
 
-		function deleteCookie() {
+		/*function deleteCookie() {
 			localStorage.clear();
-		}
+		}*/
 
 		function resetGame() {
-			if (confirm('Are you sure you want to completely reset the game??')) {
-				localStorage.clear();
-				location.reload();
+			if (document.getElementById("autoButton").innerText !== autoSymbol) {
+				if (confirm('Are you sure you want to completely reset the game??')) {
+					localStorage.clear();
+					location.reload();
+				}
 			}
 		}
 
@@ -148,35 +171,37 @@
 				writeMatrix();
 			} else {
 				localStorage.removeItem('fieldMatrix');
+				localStorage.removeItem('inGame');
+				autoVisible = 1;
 			}
+			//document.getElementById('autoButton').innerHTML = a + b == 0 || a + b == fieldSize * fieldSize - ((fieldSize - 1) / 2) * (((fieldSize - 1) / 2) - 1) * 2 ? '&#9654;' : '';
 		}
 
 		function displText(a, b) {
 			const fs = fieldSize;
 			const lon = fs * fs - ((fs - 1) / 2) * (((fs - 1) / 2) - 1) * 2;
 			let symbolClear = "&#9633"; // clear square
-			symbol = "&#9632"// bflack square
+			symbol = "&#9632"// black square
 			let dyId = orientation === "landscape" ? "dyL" : "dy";
 			let dyIdNull = orientation === "landscape" ? "dy" : "dyL";
+			let billId = orientation === "landscape" ? "billSizeL" : "billSize";
+			let billIdNull = orientation === "landscape" ? "billSize" : "billSizeL";
 			let scaleWidth = tableWidth;
-			//const KDimention = 2.46;
 			const KDimention = 2.5;
-			document.getElementById(dyId).innerHTML = `<table border=0 cellSpacing=0 cellPadding=0 id="dyTable">
-						<tr>
-							<td style="width: ${tableWidth}px; font-size: ${tableWidth * KDimention / ((fieldSize + 1) * (fieldSize + 1))}; word-break: break-all;"><span id="scale00" style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span><span id="scale01">${symbolClear.repeat(lon - a - b)}</span><span id="scale02" style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span></td>
-						</tr>
-						<tr>
-							<td style="width: ${tableWidth}px; font-size: ${tableWidth * KDimention / ((fieldSize + 1) * (fieldSize + 1))}; word-break: break-all;"><span id="scale10" style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span><span id="scale11">${symbolClear.repeat(lon - a - b)}</span><span id="scale12" style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span></td>
-						</tr>
-					</table>`;
-			document.getElementById('scale00').style.fontSize = scaleWidth * KDimention / ((fieldSize + 1) * (fieldSize + 1)) + 'px';
-			document.getElementById('scale01').style.fontSize = document.getElementById('scale00').style.fontSize;
-			document.getElementById('scale02').style.fontSize = document.getElementById('scale01').style.fontSize;
-			document.getElementById('scale10').style.fontSize = document.getElementById('scale02').style.fontSize;
-			document.getElementById('scale11').style.fontSize = document.getElementById('scale10').style.fontSize;
-			document.getElementById('scale12').style.fontSize = document.getElementById('scale11').style.fontSize;
-			document.getElementById(dyIdNull).innerHTML = "";
-			//alert(document.getElementById('scale1').style.fontSize);
+			let fontSize = Math.floor(1.65 * 100 * scaleWidth / lon * 1.0) / 100; // 0.95 — запас, щоб не було переносу
+			document.getElementById(billId).innerHTML = `<span style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span>${symbolClear.repeat(lon - a - b)}<span style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span>
+			<br><span style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(b)}</span>${symbolClear.repeat(lon - a - b)}<span style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(a)}</span>`;
+			let fontSizeVW = 165 / lon; // 95vw розділити на кількість символів
+			document.getElementById(billId).style = `font-size:${fontSizeVW}vw;`;
+			document.getElementById(billIdNull).innerHTML = '';
+			let scale = tableWidth / document.getElementById(billId).scrollWidth;
+			if (scale < 1) {
+				document.getElementById(billId).style.transform = `scale(${scale})`;
+			} else {
+				document.getElementById(billId).style.transform = '';
+			}
+			const gameCountElem = document.getElementById("gameCount");
+			if (gameCountElem) gameCountElem.innerHTML = `<span style="color: ${index2Color(firstColorIndex)}">${symbol.repeat(1)}</span>${a} : <span style="color: ${index2Color(secondColorIndex)}">${symbol.repeat(1)}</span>${b}`;
 		}
 
 		function displOne(a, b) {
@@ -196,15 +221,37 @@
 			let allVal = 0;
 			let currentRow = "";
 			if (a + b == lon) {
+				document.getElementById("autoButton").innerHTML = autoSymbol;
+				highlightStartButton();
+				if (FS > 7) {
+					document.getElementById("rButton").innerHTML = '';
+				}
+				autoVisible = 1;
 				gameOver = 1;
-				//alert('Game Over!');
 				bounceTable();
 				his.push([fieldSize, gameLevel, a, b]);
 				saveHis();
 				localStorage.removeItem('roboSwitch');
+				if (overlay === 1) {
+					delay(1500).then(() => {
+						//alert(`Game over!\nFinal score:\n${a} : ${b}`);
+						//document.getElementById("overlayDiv").style.display = "block";
+						//document.getElementById("overlayText").innerHTML = `Game over!<br>Final score:<br>${a} : ${b}`;
+						newLevel != 0 ? oldLevel = newLevel : oldLevel = oldLevel;
+
+						if (oldLevel > 0) {
+							showUpOverlay();
+						} else if (oldLevel < 0) {
+							showDownOverlay();
+						} else {
+							showContinueOverlay();
+						}
+
+					});
+				}
 			} else {
 				currentRow = `<tr>
-					<td align = center>${fs}</td>
+					${advanced ? `<td align = center>${fs}</td>` : ''}
 					<td bgcolor=${index2Color(col)} align = center><font color="${index2ColorLight(f)}">${gameLevel}</font></td>
 					<td align = center>${a}</td>
 					<td align = center bgcolor=${index2Color(col)}><font color="${index2ColorLight(f)}">${dif}</font></td>
@@ -220,18 +267,18 @@
 			f = (firstColorIndex === -2) ? 1 : 0;
 			g = (secondColorIndex === -2) ? 1 : 0;
 			let txt = `<table border=0 id="statTable">
-        		<tr bgcolor="${index2Color(firstColorIndex)}"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        		<tr bgcolor="${index2Color(firstColorIndex)}">${advanced ? `<td></td>` : ''}${orientation === "landscape" ? `<td></td>` : ''}<td></td><td></td><td></td><td></td></tr>
         		<tr>
-					<th style="font-size: ${gameLevel * 100}%; color: ${index2ColorLight(firstColorIndex)}"rowspan="${his.length * 2 + 3}" valign = "top">${gameLevel}</th>
-            		<th id="size">Size</th>
-            		<th id="level">Level</th>
+					${orientation === "landscape" ? `<th style="font-size: ${gameLevel * 100}%; color: ${index2ColorLight(firstColorIndex)}"rowspan="${his.length * 2 + 3}" valign = "top">${gameLevel}</th>` : ''}
+            		${advanced ? `<th id="size" bgcolor="${index2Color(firstColorIndex)}">Size</th>` : ''}
+            		<th id="level" bgcolor="${index2Color(firstColorIndex)}"><font color="${index2ColorLight(f)}">Level</font></th>
             		<th bgcolor="${index2Color(firstColorIndex)}"><font color="${index2ColorLight(f)}">${lon}</font></th>
            			<th id="all"></th>
             		<th bgcolor="${index2Color(secondColorIndex)}" align="center">
 						<font color="${index2ColorLight(g)}">${fs > 7 ? (fs - 2) * (fs - 2) - (((fs - 2) - 1) / 2) * ((((fs - 2) - 1) / 2) - 1) * 2 : 0}</font>
 					</th>
         		</tr>
-        		<tr bgcolor="${index2Color(2)}"><td></td><td></td><td></td><td></td><td></td></tr>
+        		<tr bgcolor="${index2Color(2)}">${advanced ? '<td></td>' : ''}<td></td><td></td><td></td><td></td></tr>
         		${currentRow}
     		`;
 
@@ -246,20 +293,31 @@
 				if (firstColorIndex == -2) {
 					f = (f === 0) ? 1 : 0;
 				}
-				txt += `<tr bgcolor="${index2Color(2)}"><td></td><td></td><td></td><td></td><td></td></tr>
+				txt += `<tr bgcolor="${index2Color(2)}">${advanced ? '<td></td>' : ''}<td></td><td></td><td></td><td></td><td></td></tr>
         		<tr>
-            		<td align="center">${i[0]}</td>
+            		${advanced ? `<td align="center">${i[0]}</td>` : ''}
             		<td bgcolor="${index2Color(col)}" align="center"><font color="${index2ColorLight(f)}">${i[1]}</font></td>
             		<td align="center">${i[2]}</td>
             		<td bgcolor="${index2Color(col)}" align="center"><font color="${index2ColorLight(f)}">${diff}</font></td>
             		<td align="center">${i[3]}</td>
         		</tr>`;
 			}
-			txt += `<tr bgcolor="${index2Color(2)}"><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>`;
+			txt += `<tr bgcolor="${index2Color(2)}">${advanced ? '<td></td>' : ''}<td></td><td></td><td></td><td></td><td></td></tr></table>`;
 			let ntId = orientation === "landscape" ? "ntL" : "nt";
 			let ntIdNull = orientation === "landscape" ? "nt" : "ntL";
 			document.getElementById(ntId).innerHTML = txt;
 			document.getElementById(ntIdNull).innerHTML = "";
+			if (orientation === "landscape") {
+				document.getElementById("bigLevel").innerHTML = "";
+			} else {
+				document.getElementById("bigLevel").innerHTML = gameLevel;
+				document.getElementById("bigLevel").style.color = index2ColorLight(index2ColorLight(f));
+				document.getElementById("bigLevel").style.fontSize = `${gameLevel * 100}%`;
+				document.getElementById("bigLevelContainer").style.backgroundColor = index2Color(firstColorIndex);
+				document.getElementById("bigLevelContainer").style.width = (tableWidth - document.getElementById("bannerDownContainer").style.width) + 'px';
+				document.getElementById("tableDown").style.width = tableWidth + 'px';
+				document.getElementById("tableTexting").style.width = tableWidth + 'px';
+			}
 
 			// Відображення загального рахунку
 			let allValModule = Math.abs(allVal);
@@ -274,19 +332,27 @@
 				newLevel = (gameLevel > 1) ? -1 : 0;
 				//newLevel = -1;
 				document.getElementById("level").bgColor = index2Color(secondColorIndex);
-				document.getElementById("size").bgColor = index2Color(secondColorIndex);
+				if (advanced) {
+					document.getElementById("size").bgColor = index2Color(secondColorIndex);
+				}
 				f = (secondColorIndex === -2) ? 1 : 0;
 				document.getElementById("level").innerHTML = `<font color="${index2ColorLight(f)}">${document.getElementById("level").innerText}</font>`;
-				document.getElementById("size").innerHTML = `<font color="${index2ColorLight(f)}">${document.getElementById("size").innerText}</font>`;
+				if (advanced) {
+					document.getElementById("size").innerHTML = `<font color="${index2ColorLight(f)}">${document.getElementById("size").innerText}</font>`;
+				}
 				fontK = 0.5;
 			} else
 				if (allVal > lon) {
 					newLevel = (gameLevel > 0) ? 1 : 0;
 					document.getElementById("level").bgColor = index2Color(firstColorIndex);
-					document.getElementById("size").bgColor = index2Color(firstColorIndex);
+					if (advanced) {
+						document.getElementById("size").bgColor = index2Color(firstColorIndex);
+					}
 					g = (firstColorIndex === -2) ? 1 : 0;
 					document.getElementById("level").innerHTML = `<font color="${index2ColorLight(g)}">${document.getElementById("level").innerText}</font>`;
-					document.getElementById("size").innerHTML = `<font color="${index2ColorLight(g)}">${document.getElementById("size").innerText}</font>`;
+					if (advanced) {
+						document.getElementById("size").innerHTML = `<font color="${index2ColorLight(g)}">${document.getElementById("size").innerText}</font>`;
+					}
 					fontK = 3;
 				}
 
@@ -297,7 +363,6 @@
 			cell.bgColor = index2Color(col);
 			cell.style.fontSize = `${fontK * 100}%`;
 			changeSize = 0;
-			//document.getElementById("size").style.color = index2Color(1);
 		}
 
 		// Robot function to find and click on lines
@@ -366,6 +431,7 @@
 				const randomInt = Math.floor(Math.random() * (max - min + 1)) + min;// Random index
 
 				// 6. Виконання дії залежно від query
+
 				if (query == 0) {
 					clickk(cellId(pref, filtered[randomInt][1] + FS - fs, filtered[randomInt][0] + FS - fs));// click on random line
 					robot(10);
@@ -380,21 +446,20 @@
 					clickk(cellId(pref, filtered[randomInt][1] + FS - fs, filtered[randomInt][0] + FS - fs));// click on random line
 					fnAutoBlick(query);
 				} else if (query == 10) {
-					fnReNew(filtered[randomInt][0] + FS - fs, filtered[randomInt][1] + FS - fs);
-				}
-				if ((query == 2 || query == -2) && ratemin == 0 && filtered.length <= 6) {
-					roboSwitch = 0;
-					roboColor('vartab');
-				}
-				if (query == -1) {
+					//fnReNew(filtered[randomInt][0] + FS - fs, filtered[randomInt][1] + FS - fs);
+					fnStatus(ratemin, filtered.length);
+					//document.getElementById('autoButton').innerHTML = '';
+				} else if (query == -1) {
 					fnBlick(filtered[randomInt][0] + FS - fs, filtered[randomInt][1] + FS - fs);
 				}
-				if (query == 10) {
-					fnStatus(ratemin, filtered.length);
+				if ((query == 2 || query == -2) && ratemin == 0 && filtered.length <= 6) {
+					autoMove = 0;// stop auto
+					roboSwitch = 0;
+					roboColor('vartab');
+					colsel(pref + "0101");
 				}
 			} else {
 				optymalMatrix = [];
-				//bounceTable();
 			}
 			if (query != 10) {
 				robot(10);
@@ -409,10 +474,14 @@
 			document.getElementById(statIdNull).innerHTML = "";
 			let rateCount = rateMin;
 			if (rateMin == 0) { symbol = "&#9633"; rateCount = 1; }// white square
-			if (rateCount <= 20) {
-				document.getElementById(statId).innerHTML = `${symbol.repeat(rateCount)} : ${filteredLength}`;
+			if (advanced) {
+				if (rateCount <= 20) {
+					document.getElementById(statId).innerHTML = `${symbol.repeat(rateCount)} : ${filteredLength}`;
+				} else {
+					document.getElementById(statId).innerHTML = `${symbol.repeat(3)}...${symbol.repeat(3)}`;
+				}
 			} else {
-				document.getElementById(statId).innerHTML = `${symbol.repeat(3)}...${symbol.repeat(3)}`;
+				document.getElementById(statId).innerHTML = ``;
 			}
 		}
 
@@ -427,12 +496,12 @@
 			document.getElementById(cellId(pref, x, y)).bgColor = index2Color(fieldMatrix[y + fieldSize - FS][x + fieldSize - FS]);// gray
 		}
 
-		async function fnReNew(y, x) {
+		/*async function fnReNew(y, x) {
 			await delay(100);
 			//document.body.style.color = index2Color(1);// 
 			//document.getElementById("textingL").style.color = "#ffffff";
 			//document.body.style.color = "#ffffff";
-		}
+		}*/
 
 		// Function to handle cell clicks
 		function lnCheckV(mx, ln, y, x) {
@@ -491,7 +560,6 @@
 				document.getElementById("grayBtn").style.backgroundColor =
 					roboSwitch === 1 ? index2Color(2) : index2Color(0);
 			}
-			//document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
 		}
 
 		// 
@@ -524,7 +592,7 @@
 			if (roboSwitch === 1) await robot(0);
 			if (gameOver == 0) {
 				bill(fieldSize);
-			} //else (alert('Game Over!'));
+			}
 		}
 
 		// Function to get the neighbors of a cell in the matrix
@@ -626,6 +694,9 @@
 
 			if (fieldMatrix[nY][nX] === 2) {
 				fieldMatrix[nY][nX] = 1;
+				saveValue('inGame', 1);
+				document.getElementById('autoButton').innerHTML = ''; // play symbol
+				stopHighlight()
 				Bor.bgColor = index2Color(1);
 
 				firstColorSet();
@@ -660,7 +731,7 @@
 				firstColorIndex = (secondColorIndex === -1) ? -2 : -1;
 			}
 			gameColorIndex = (gameColorIndex === firstColorIndex) ? secondColorIndex : firstColorIndex; // toggle between blue and yellow
-			document.getElementById(id).bgColor = index2Color(gameColorIndex);
+			document.getElementById(id).bgColor = autoMove === 0 ? index2Color(gameColorIndex) : index2Color(2);
 			let f;
 			if (gameColorIndex == -1) {
 				f = 0;
@@ -710,16 +781,21 @@
 			let cellWidth;
 			let cellHeight;
 			fieldMatrix = Array.from({ length: FS * 2 + 2 }, () => Array(FS * 2 + 1).fill(0));
+			if (localStorage.getItem('fieldMatrix') == null || localStorage.getItem('inGame') === null) {
+				autoVisible = 1;
+			} else {
+				autoVisible = 0;
+			}
 			if (change == 0 && localStorage.getItem('fieldMatrix') !== null) {
 				readMatrix();
 			}
 			let dF = FS - fs
-			html.push(`<TABLE border=0 cellSpacing=0 id="vartab" style="table-layout: fixed; border-collapse: collapse; width: ${tableWidth}px; height: ${tableWidth}px;">`);
+			html.push(`<TABLE border=0 cellSpacing=0 id="vartab" style="table-layout: fixed; border-collapse: collapse; width: ${tableWidth}px; height: ${tableWidth}px; paddong: 0;">`);
 			for (let y = 0; y < FS * 2 + 1; y++) {
 				html.push(`<TR style="height:${y % 2 == 1 ? linesWidth : linesWidth / 10}px;">`);
 				for (let x = 0; x < FS * 2 + 1; x++) {
 					X = x - dF; Y = y - dF;
-					let td = `<TD id="${cellId(pref, x, y)}" bgcolor="`;
+					let td = `<TD class="icon-td" id="${cellId(pref, x, y)}" bgcolor="`;
 					let ck = 0;
 					// Визначаємо колір клітинки
 					if (x == 2 * FS - 1 && y == 2 * FS - 1) { td += index2Color(roboSwitch === 1 ? 2 : 0); } //gray or white
@@ -746,38 +822,53 @@
 					td += ` style="width:${cellWidth}px; height:${cellHeight}px; max-height:${cellHeight}px; min-height:${cellHeight}px; padding:0px; margin:0px; border:0px; font-size:${tableWidth / (1.5 * FS)}px; line-height:${cellHeight}px; overflow:hidden; vertical-align:middle; white-space: nowrap;"`;
 					td += ' onclick="';
 					// Призначаємо події
-					if (x == 1 && y == 1) { td += "colsel('" + pref + "0101')"; } // blue
+					if (x == 1 && y == 1 && false) { td += "colsel('" + pref + "0101')"; } // blue
 					else if (x == 3 && y == 1) { td += advanced ? "fnChanger(2)" : ""; }//+
 					else if (x == 1 && y == 3) { td += advanced ? "fnChanger(-2)" : ""; }//-
 					else if (x == FS * 2 - 1 && y == FS * 2 - 3) { td += advanced ? "fnLevel(1)" : ""; } //+
 					else if (x == FS * 2 - 3 && y == FS * 2 - 1) { td += advanced ? "fnLevel(-1)" : ""; } //-
 					else if (x == 3 && y == FS * 2 - 1) { td += advanced ? "fnNewGame()" : ""; } //#
 					else if (x == 1 && y == FS * 2 - 1) { td += "fnAuto()"; } //>
+					else if (x == FS * 2 - 5 && y == 1) { td += advanced && FS > 7 ? "fnWorm()" : ""; } //W
+					else if (x == FS * 2 - 1 && y == 5) { td += advanced && FS > 7 ? "fnSnake()" : ""; } //S
+					else if (x == FS * 2 - 3 && y == 1) { td += "changeColorPalette()"; } //
+					else if (x == FS * 2 - 1 && y == 3) { td += "fnDarkMode()"; } //
 					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += advanced ? "fnQuery()" : ""; }
 					else if (x == (2 * FS - 1) && y == 1) { td += advanced ? "robot(0)" : ""; }
 					else if (x == 2 * FS - 1 && y == 2 * FS - 1) { td += advanced ? "roboColor('vartab')" : ""; }
 					else if (ck == 1 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { td += "clickh('" + cellId(pref, x, y) + "')"; }
 					else if (ck != 2 && X + Y > fs - 4 && X + Y < 3 * fs + 4 && -X + Y < fs + 4 && X - Y < fs + 4) { matrixCell.push(cellId(pref, x, y)); }
-					else if (x == FS * 2 - 3 && y == 1) { td += advanced ? "fnWorm()" : ""; } //W
-					else if (x == FS * 2 - 1 && y == 3) { td += advanced ? "fnSnake()" : ""; } //S
-					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += "resetGame()"; }//R
+					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += advanced ? "resetGame()" : ""; }//R
 					td += '"';
-					td += ' align="center" valign="middle">';
-					// Символи
-					if ((x == 1 && y == 1)) { td += `<font color=${index2Color(0)}>${fs}</font>`; }
+					td += ' align="center" valign="middle" >';
+					// Символи у клітинках
+					if ((x == 1 && y == 1)) { td += advanced ? `<font color=${index2Color(0)}>${fs}</font>` : '' } // blue
 					else if (x == 3 && y == 1) { td += advanced ? "+" : ""; }
 					else if (x == 1 && y == 3) { td += advanced ? "-" : ""; }
 					else if (x == FS * 2 - 1 && y == FS * 2 - 3) { td += advanced ? "+" : ""; }
 					else if (x == FS * 2 - 3 && y == FS * 2 - 1) { td += advanced ? "-" : ""; }
-					else if (x == 1 && y == FS * 2 - 1) { td += '&#9654' }//>
+					else if (x == 1 && y == FS * 2 - 1) {
+						td += `<span id="autoButton">${autoVisible !== 0 ? autoSymbol : ''}</span>`;//>
+					}
 					else if (x == 3 && y == FS * 2 - 1) { td += advanced ? '&#8862' : '' }//#
+					else if (x == FS * 2 - 5 && y == 1) { td += advanced && FS > 7 ? '🪱' : ''; }//W
+					else if (x == FS * 2 - 1 && y == 5) { td += advanced && FS > 7 ? '&#128013' : ''; }//S
+					//else if (x == FS * 2 - 3 && y == 1) { td += `<img src="${colorPalette == 0 ? 'xoxr.png' : 'xox.png'}" id="xoxpngf" alt="Col" >` }//
+					//else if (x == FS * 2 - 1 && y == 3) { td += `${darkMode === 0 ? '<span class="material-symbols-outlined">dark_mode</span>' : '<span class="material-symbols-outlined">light_mode</span>'}` }//
+					//else if (x == FS * 2 - 1 && y == 3) {
+					//	td += `<span class="material-symbols-outlined" style="font-size:70%;line-height:1;vertical-align:middle;display:inline-block;">${darkMode === 0 ? 'dark_mode' : 'light_mode'}</span>`;
+					//}
+					//else if (x == FS * 2 - 1 && y == 3) {
+					//	td += `<span class="material-symbols-outlined" style="font-size:30px;line-height:1;vertical-align:middle;display:inline-block;">${darkMode === 0 ? 'dark_mode' : 'light_mode'}</span>`;
+					//} 
+					/*	else if (x == FS * 2 - 1 && y == 3) {
+							td += `<div style="display:flex;align-items:center;justify-content:center;height:100%;">
+			<span class="material-symbols-outlined" style="font-size:10%;">${darkMode === 0 ? 'dark_mode' : 'light_mode'}</span>
+		</div>`;
+						}*/
 					else if ((X + Y === fs - 3 || X + Y == 3 * fs + 3 || -X + Y == fs + 3 || X - Y == fs + 3) && Y >= 0 && X >= 0 && Y <= fs * 2 && X <= fs * 2 && x % 2 == 1 && y % 2 == 1) { td += advanced ? '&#128161' : '' }//?
-					//else if (x == (2 * FS - 1) && y == 1) { td += advanced ? '🤖' : ''; }
-					//else if (x == 2 * FS - 1 && y == 2 * FS - 1) { td += advanced ? (roboSwitch === 1 ? '🟢' : '⚪') : ''; }
-					else if (x == FS * 2 - 3 && y == 1) { td += advanced ? '🪱' : ''; }//W
-					else if (x == FS * 2 - 1 && y == 3) { td += advanced ? '&#128013' : ''; }//S
 					else if (x == FS * 2 - 1 && y == FS * 2 - 1) { td += gameLevel; }
-					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += 'R' }
+					else if (x == 1 && y == FS * 2 - 3 && FS > 7) { td += `<span id="rButton">${autoVisible == 0 && advanced ? 'R' : ''}</span>` }//R
 					td += '</TD>';
 					html.push(td);
 				}
@@ -792,20 +883,23 @@
 			let dyHeight = 0;
 			const dyElem = document.getElementById("dy");
 			if (dyElem) {
-				dyHeight = dyElem.offsetHeight || 60;
+				//dyHeight = dyElem.offsetHeight || 60;
 			}
-			const bottomMargin = 10;
+			const bottomMargin = 0;
 			// Вираховуємо доступну висоту для поля
 			let availableHeight = window.innerHeight - dyHeight - bottomMargin;
 			// Вибираємо мінімум з ширини і доступної висоти
 			return Math.floor(Math.min(window.innerWidth, availableHeight) * 1.0);
+
 		}
 
 		// Initial call to set up the game board
 		function writeHtml(change) {
-			advanced = Number(getValue("advanced", 0));
-			//document.body.style.backgroundColor = index2Color(0);
-			//document.body.style.color = index2Color(1);
+			advanced = Number(getValue("advanced", pro));
+			if (pro === 0) {
+				advanced = 0;
+			}
+			manualDarkMode = Number(getValue("manualDarkMode", manualDarkMode));
 			lightGreenColor = index2Color(10); // light green
 			darkGreenColor = index2Color(11); // dark green
 
@@ -823,7 +917,10 @@
 			//// Вибираємо мінімум з ширини і доступної висоти
 			//tableWidth = Math.min(window.innerWidth, availableHeight) * 0.95;
 
-			tableWidth = getTableWidth();
+			if (change == 10) {
+				tableWidth = getTableWidth() * 1.0;
+				change = 0;
+			}
 
 			FS = Number(getValue("FS", 7));
 			roboSwitch = Number(getValue("roboSwitch", roboSwitch));
@@ -842,12 +939,24 @@
 				gameName = "gameNameP";
 				gameNameNull = "gameNameL";
 			}
+			if (advanced) {
+				document.getElementById("coordXcon").innerHTML = createCoordX(fs);//X axis
+				document.getElementById("coordXcon").width = `${tableWidth}px`;
+				document.getElementById("coordYcon").innerHTML = createCoordY(fs);//Y axis
+			}
 
-			document.getElementById("coordXcon").innerHTML = createCoordX(fs);//X axis
-			document.getElementById("coordXcon").width = `${tableWidth}px`;
-			document.getElementById("coordYcon").innerHTML = createCoordY(fs);//X axis
 			document.getElementById("tx").innerHTML = createHtml(fs, FS, change);//Game Board
-
+			const txDiv = document.getElementById("tx");
+			const innerTable = txDiv.querySelector("table");
+			if (innerTable) {
+				txDiv.style.width = innerTable.scrollWidth + "px";
+				txDiv.style.height = innerTable.scrollHeight + "px";
+			}
+			const scale = tableWidth / txDiv.scrollWidth;
+			txDiv.style.transform = `scale(${scale})`;
+			txDiv.style.transformOrigin = "top left";
+			document.getElementById('tx-container').style.width = tableWidth + "px";
+			document.getElementById('tx-container').style.height = tableWidth + "px";
 			displText(0, 0);
 			grayCellId = cellId(pref, FS * 2 - 1, FS * 2 - 1);
 
@@ -894,15 +1003,65 @@
 			document.getElementById('tx-container').style.width = `${tableWidth}px`;
 			document.body.style.color = "#fff";
 			document.body.style.color = index2Color(1);
-			document.getElementById(gameName).innerHTML = `<h1 style="margin-bottom: 0em"><span style="color: ${index2Color(firstColorIndex)};">X</span><span style="color: ${index2Color(secondColorIndex)};">O</span><span
-			style="font-weight: normal;">Game</span><span id="gameVersionVal" style="font-size: 10px;">${ver}</span></h1>`
+			document.getElementById(gameName).innerHTML = `<table style="width: ${tableWidth}px;"><tr><td><h1 style="margin-bottom: 0em"><span style="color: ${index2Color(firstColorIndex)};">X</span><span style="color: ${index2Color(secondColorIndex)};">O</span><span
+			style="font-weight: normal;">Game</span>${pro === 1 ? `<span style="color: ${index2Color(firstColorIndex)};">P</span><span style="color: ${index2Color(secondColorIndex)};">ro</span>` : ""}<span id="gameVersionVal" style="font-size: 10px;">${ver}</span></h1></td><td style="text-align: right;"><span id="gameCount" style="font-size: 100%;"></span></td></tr></table>`
 			document.getElementById(gameNameNull).innerHTML = "";
-			if (orientation == "landscape") {
-				document.getElementById("bannerL").style.visibility = "visible";
-				document.getElementById("bannerP").style.visibility = "hidden";
+			const reclamaL = "";
+			const reclamaP = "";
+			if (pro == 0) {
+				if (orientation === "landscape") {
+					document.getElementById("bannerL").style.display = "block";
+					document.getElementById("bannerDownContainer").style.display = "none";
+					document.getElementById("footer").style.display = "none";
+				} else {
+					document.getElementById("bannerL").style.display = "none";
+					document.getElementById("bannerDownContainer").style.display = "block";
+					document.getElementById("footer").style.display = "block";
+				}
 			} else {
-				document.getElementById("bannerL").style.visibility = "hidden";
-				document.getElementById("bannerP").style.visibility = "visible";
+				document.getElementById("bannerL").style.display = "none";
+				document.getElementById("bannerP").style.display = "none";
+			}
+			btn = document.getElementById("autoButton");
+			highlightStartButton();
+			if (orientation == "landscape" || pro == 1) {
+				document.getElementById("bannerDown").style.display = "none";
+			} else {
+				document.getElementById("bannerDown").style.display = "block";
+			}
+			if (localStorage.getItem('inGame') == null && his.length == 0) {
+				showStartOverlay();
+			}
+			if (orientation == "landscape") {
+				document.getElementById("topRow").style.display = "table-row";
+				document.getElementById("tx").style.display = "block";
+				document.getElementById("tableTexting").style.display = "block";
+				if (menuMap != 0) {
+					menuMap = 0;
+					writeHtml(0);
+				}
+			} else {
+				// Портретна орієнтація
+				if (menuMap == 0) {
+					document.getElementById("topRow").style.display = "table-row";
+					document.getElementById("tx").style.display = "block";
+					document.getElementById("tableTexting").style.display = "none";
+					document.getElementById("billSize").style.display = "block";
+				} else if (menuMap == 1) {
+					document.getElementById("topRow").style.display = "none";
+					document.getElementById("tx").style.display = "none";
+					document.getElementById("vartab").style.display = "none";
+					document.getElementById("tableTexting").style.display = "block";
+					document.getElementById("nt").style.display = "block";
+					document.getElementById("billSize").style.display = "none";
+				} else if (menuMap == 4) {
+					document.getElementById("topRow").style.display = "none";
+					document.getElementById("tx").style.display = "none";
+					document.getElementById("vartab").style.display = "none";
+					document.getElementById("tableTexting").style.display = "block";
+					document.getElementById("nt").style.display = "none";
+					document.getElementById("billSize").style.display = "none";
+				}
 			}
 		}
 
@@ -923,28 +1082,45 @@
 			//document.getElementById("metaDescription").setAttribute("content", bannerTxt);
 			bannerTxt = ``;
 			document.getElementById(textingId).innerHTML = ``;
-			document.getElementById(textingId).innerHTML += `<img src="qrcode.gif" id="qrcodeImg" style="width:${cellWidthQ}px; height:${cellWidthQ}px" alt="QR Code" align="left">`;
-			document.getElementById(textingId).innerHTML += `<br>Changing the color palette <img src="${colorPalette == 0 ? 'xoxr.png' : 'xox.png'}" id="xoxpng" alt="Col" align="left" onclick="changeColorPalette()">`;
-			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
-			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(secondColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'robot' : 'second gamer'} color`;
-			document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}; font-weight: bold;">${gameLevel}</span> is game level`;
-			document.getElementById(textingId).innerHTML += '<br>Try pressing <input type="button" value="&#9654" onclick="fnAuto()" id="autoBtn1" style="width: 30px; height: 30px; font-size: 24px;"> to get started. The first moves will be automatic.';
-			document.getElementById(textingId).innerHTML += '<br>The goal is to get more squares of your color to move to a higher level and board size.';
-			document.getElementById(textingId).innerHTML += `<br>${darkMode === 0 ? "Dark" : "Light"} mode <input type="button" value="${darkMode === 0 ? "&#9790" : "&#9728"};" onclick="fnDarkMode()" id="darkBtn" style="width: 30px; height: 30px; font-size: 24px;"> toggle.`;
-			document.getElementById(textingId).innerHTML += `<br>${fullScreen ? "Exit " : ""}Full screen <input type="button" onclick="fnFullScreen()" value=${fullScreen ? "&#8658;" : "&#9974;"} title="Full screen mode" style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;"> mode.`;
-			document.getElementById(textingId).innerHTML += `<hr>`;
-			document.getElementById(textingId).innerHTML += `${advanced ? `Click on the gray square <input type="button" value="1" onclick="roboColor('vartab')" id="grayBtn" style="width: 30px; height: 30px; font-size: 24px;background-color:#eee; border:none;"> to toggle the robot on/off.` : ``}`;
-			document.getElementById(textingId).innerHTML += `${advanced ? `<br>${darkMode === 0 ? "White" : "Black"} square <input type="button" value=" " onclick="robot(0)" id="whiteBtn" style="width: 30px; height: 30px; font-size: 24px; background-color:#fff;"> in the upper right corner - robot progress.` : ``}`;
-			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="&#128161" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint` : ``}`;
-			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="🪱" onclick="fnWorm()" id="wormBtn" style="width: 30px; height: 30px; font-size: 24px;"> - The worm` : ``}`;
-			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="&#128013" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - The wise snake that crawls through a maze and finds successful moves` : ``}`;
-			document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="&#8862" onclick="fnNewGame()" id="newGameBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Clear field` : ``}`;
-			document.getElementById(textingId).innerHTML += `${advanced ? `<br>` : ``}<input type="button" value="R" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game`;
-			document.getElementById(textingId).innerHTML += `<input type="button" onclick="bounceTable()" value="&#x21bb;" title="Bounce the table"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">`;
-			document.getElementById(textingId).innerHTML += `<br>${advanced ? "Simple" : "Advanced"} <input type="button" onclick="fnAdvanced()" value=${advanced ? "&#9632;" : "&#9881;"} title="Advanced mode"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;"> mode for ${advanced ? "beginers" : "experienced players"}.`;
+			if (orientation == "landscape" && false) {
+				document.getElementById(textingId).innerHTML += `<img src="qrcode.gif" id="qrcodeImg" style="width:${cellWidthQ}px; height:${cellWidthQ}px" alt="QR Code" align="left"><br>`;
+			}
+			if (orientation == "portrait") {
+				document.getElementById(textingId).innerHTML += ``;
+			}
+			if (menuMap == 1 || orientation == "landscape") {
+				document.getElementById(textingId).innerHTML += `<div id="infoText"><span style="color: ${index2Color(firstColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'your' : 'first gamer'} color`;
+				document.getElementById(textingId).innerHTML += `<span style="color: ${index2Color(secondColorIndex)}">&#9632</span> is ${roboSwitch == 1 ? 'robot' : 'second gamer'} color`;
+				document.getElementById(textingId).innerHTML += `<br><span style="color: ${index2Color(firstColorIndex)}; font-weight: bold;">${gameLevel}</span> is game level`;
+				document.getElementById(textingId).innerHTML += `<br>Try pressing <input type="button" value="${autoSymbol}" onclick="fnAuto()" id="autoBtn1" style="width: 30px; height: 30px; font-size: 24px;"> to get started. The first moves will be automatic.`;
+				document.getElementById(textingId).innerHTML += '<br>The goal is to get more squares of your color to move to a higher level and board size.</div>';
+			}
+			if (menuMap == 4 || orientation == "landscape") {
+				document.getElementById(textingId).innerHTML += `<br>Changing the color palette <img src="${colorPalette == 0 ? 'xoxr.png' : 'xox.png'}" id="xoxpng" alt="Col" align="left" onclick="changeColorPalette()">`;
+				//document.getElementById(textingId).innerHTML += `<br>${darkMode === 0 ? "Dark" : "Light"} mode <input type="button" value="${darkMode === 0 ? "&#9790" : "&#9728"};" onclick="fnDarkMode()" id="darkBtn" style="width: 30px; height: 30px; font-size: 24px;"> toggle.`;
+				document.getElementById(textingId).innerHTML += `<br>${darkMode === 0 ? "Dark" : "Light"} mode <button onclick="fnDarkMode()" id="darkBtn" style="width: 30px; height: 30px; font-size: 24px; vertical-align: middle;"><span class="material-symbols-outlined">${darkMode === 0 ? "dark_mode" : "light_mode"}</span></button> toggle.`;
+				document.getElementById(textingId).innerHTML += `<br>${manualDarkMode == 0 ? "Manual" : "Auto"} dark mode <button onclick="fnManualDark()" id="manualDarkBtn" style="width: 30px; height: 30px; font-size: 24px; vertical-align: middle;"><span class="material-symbols-outlined">${manualDarkMode === 0 ? "night_sight_auto_off" : "night_sight_auto"}</span></button> toggle.`;
+				document.getElementById(textingId).innerHTML += `${desktop ? `<br>${fullScreen ? "Exit " : ""}Full screen <input type="button" onclick="fnFullScreen()" value=${fullScreen ? "&#8658;" : "&#9974;"} title="Full screen mode" style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;"> mode.` : ``}`;
+				document.getElementById(textingId).innerHTML += `<hr>`;
+				document.getElementById(textingId).innerHTML += `${advanced ? `Click on the gray square <input type="button" value="1" onclick="roboColor('vartab')" id="grayBtn" style="width: 30px; height: 30px; font-size: 24px;background-color:#eee; border:none;"> to toggle the robot on/off.` : ``}`;
+				document.getElementById(textingId).innerHTML += `${advanced ? `<br>${darkMode === 0 ? "White" : "Black"} square <input type="button" value=" " onclick="robot(0)" id="whiteBtn" style="width: 30px; height: 30px; font-size: 24px; background-color:#fff;"> in the upper right corner - robot progress.` : ``}`;
+				document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="&#128161" onclick="fnQuery()" id="hintBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Hint` : ``}`;
+				document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="🪱" onclick="fnWorm()" id="wormBtn" style="width: 30px; height: 30px; font-size: 24px;"> - The worm` : ``}`;
+				document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="&#128013" onclick="fnSnake()" id="snakeBtn" style="width: 30px; height: 30px; font-size: 24px;"> - The wise snake that crawls through a maze and finds successful moves` : ``}`;
+				document.getElementById(textingId).innerHTML += `${advanced ? `<br><input type="button" value="&#8862" onclick="fnNewGame()" id="newGameBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Clear field` : ``}`;
+				//document.getElementById(textingId).innerHTML += `${advanced ? `<br>` : ``}<input type="button" value="${'<span class="material-symbols-outlined">delete</span>'}" onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px;"> - Full reset of the entire game`;
+				if (orientation == "landscape") {
+					document.getElementById(textingId).innerHTML += `${advanced ? `<br>` : ``}<button onclick="resetGame()" id="rBtn" style="width: 30px; height: 30px; font-size: 24px; vertical-align: middle;"><span class="material-symbols-outlined">delete</span></button> - Full reset of the entire game`;
+				}
+				if (pro != 0) {
+					document.getElementById(textingId).innerHTML += `${advanced ? "<br>Simple" : "<br>Advanced"} <input type="button" onclick="fnAdvanced()" value=${advanced ? "&#9632;" : "&#9881;"} title="Advanced mode"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;"> mode for ${advanced ? "beginers" : "experienced players"}.`;
+				}
+				//document.getElementById(textingId).innerHTML += `${orientation == "landscape" ? "<br>" : ""}<input type="button" onclick="location.reload(true)" value="&#x21bb;" title="Reload the entire page"style="width: 30px; height: 30px; font-size: 24px; margin-top: 10px;">Refresh`;
+				document.getElementById(textingId).innerHTML += `${orientation == "landscape" ? "<br>" : ""} Refresh <button onclick="location.reload(true)" id="rfreshBtn" style="width: 30px; height: 30px; font-size: 24px; vertical-align: middle;"><span class="material-symbols-outlined">refresh</span></button>`;
 
-			const qr = document.getElementById('qrcodeImg');
-			if (qr) qr.style.filter = `invert(${darkMode})`; // Adjust QR code for dark mode
+				const qr = document.getElementById('qrcodeImg');
+				if (qr) qr.style.filter = `invert(${darkMode})`; // Adjust QR code for dark mode
+			}
 		}
 
 		function changeColorPalette() {
@@ -964,7 +1140,6 @@
 			saveValue('darkMode', darkMode);
 			writeHtml(0);
 			document.getElementById('vartab').style.color = index2Color(1);
-			document.getElementById('dyTable').style.color = index2Color(1);
 			document.getElementById('statTable').style.color = index2Color(1);
 			document.getElementById('stat').style.color = index2Color(1);
 			document.getElementById('statL').style.color = index2Color(1);
@@ -972,32 +1147,67 @@
 				document.getElementById('coordtabX').style.color = index2Color(1);
 				document.getElementById('coordtabY').style.color = index2Color(1);
 			}
-			//document.getElementById('qrcodeImg').style.filter = `invert(${darkMode})`;
+			//document.getElementById('qrcodeImg').style.filter = `invert(${ darkMode })`;
 			document.body.style.color = "#fff";
 			document.body.style.color = index2Color(1);
+		}
 
+		function autoDarkModeByTime() {
+			const now = new Date();
+			const hour = now.getHours();
+			if (gameOver === 1 || manualDarkMode === 1) {
+				return;
+			}
+			// Темний режим з 21:00 до 7:00
+			const newDarkMode = (hour >= 17 || hour < 7) ? 1 : 0;
+			if (Number(getValue("darkMode", 0)) !== newDarkMode) {
+				darkMode = newDarkMode;
+				saveValue('darkMode', darkMode);
+				writeHtml(0); // Оновити сторінку без перезавантаження
+			}
+		}
+
+		function autoDarkModeBySun() {
+			if (gameOver === 1 || manualDarkMode === 1) {
+				return;
+			}
+			if (!navigator.geolocation) {
+				autoDarkModeByTime();
+				return;
+			}
+			navigator.geolocation.getCurrentPosition(function (pos) {
+				const lat = pos.coords.latitude;
+				const lng = pos.coords.longitude;
+				const times = SunCalc.getTimes(new Date(), lat, lng);
+				const now = new Date();
+				const newDarkMode = (now < times.sunrise || now > times.sunset) ? 1 : 0;
+				if (darkMode !== newDarkMode) {
+					darkMode = newDarkMode;
+					saveValue('darkMode', darkMode);
+					writeHtml(0);
+				}
+			}, function () {
+				autoDarkModeByTime();
+			});
 		}
 
 		// Function to create the display area for the game
 		function createDisplOne(fs) {
 			const dimen = fs * fs - ((fs - 1) / 2) * (((fs - 1) / 2) - 1) * 2;
 			const html = [];
-			html.push(`<TABLE WIDTH="${24.3 * FS}" HEIGHT="12" BORDER="0" CELLSPACING="1" CELLPADDING="1" bgcolor="#ffffff" id="displt">`);
+			html.push(`< TABLE WIDTH = "${24.3 * FS}" HEIGHT = "12" BORDER = "0" CELLSPACING = "1" CELLPADDING = "1" bgcolor = "#ffffff" id = "displt" > `);
 			html.push('<TR>');
 			for (let i = 0; i < dimen; i++) {
-				html.push(`<TD id="${cellIdL("e", i, 0)}" bgcolor="${index2Color(2)}"></TD>`);
+				html.push(`< TD id = "${cellIdL("e", i, 0)}" bgcolor = "${index2Color(2)}" ></TD > `);
 			}
 			html.push('<TR>');
 			html.push('</TR>');
 			for (let i = 0; i < dimen; i++) {
-				html.push(`<TD id="${cellIdL("f", i, 0)}" bgcolor="${index2Color(2)}"></TD>`);
+				html.push(`< TD id = "${cellIdL("f", i, 0)}" bgcolor = "${index2Color(2)}" ></TD > `);
 			}
 			html.push('</TR></TABLE>');
 			return html.join('');
 		}
-
-		// Event listener to call writeHtml when the document is loaded
-		document.addEventListener('DOMContentLoaded', function () { writeHtml(0); });
 
 		// Helper function to generate cell IDs
 		function getNeighborCellId(cellId, dy, dx) {
@@ -1268,26 +1478,38 @@
 		function fnQuery() { robot(1); }// Call the robot function with query = 1
 
 		async function fnAuto() {
-			if (gameOver == 1) {
+			autoMove = 1;// Встановлюємо прапорець автоматичних ходів
+			if (document.getElementById("autoButton").innerText == autoSymbol) {
+				if (gameOver == 1) {
+					//bounceTable();
+					//await delay(2000); // Чекаємо завершення анімації (час має відповідати bounceTable)
+					//newLevel != 0 ? oldLevel = newLevel : oldLevel = oldLevel;
+					fnNewGame();
+					await delay(150);   // Дати DOM оновитися (можна збільшити до 100-150 при потребі)
+					writeHtml(0);
+					fnAuto();          // Запускаємо автоматичні ходи вже у новій грі
+					return;
+				}
 				//bounceTable();
-				//await delay(2000); // Чекаємо завершення анімації (час має відповідати bounceTable)
-				fnNewGame();
-				await delay(150);   // Дати DOM оновитися (можна збільшити до 100-150 при потребі)
-				writeHtml(0);
-				fnAuto();          // Запускаємо автоматичні ходи вже у новій грі
-				return;
+				await delay(200);
+				roboSwitch = 0;
+				document.getElementById(grayCellId).bgColor = roboSwitch == 1 ? index2Color(0) : index2Color(2);
+
+				robot(2);
+				document.getElementById("autoButton").innerHTML = '';
+
+				stopHighlight();
+				oldLevel = 0;
+				if (FS > 7 && advanced) {
+					document.getElementById("rButton").innerHTML = 'R';
+				}
 			}
-			//bounceTable();
-			await delay(200);
-			roboSwitch = 0;
-			document.getElementById(grayCellId).bgColor = roboSwitch == 1 ? index2Color(0) : index2Color(2);
-			robot(2);
 		}
 
 		async function fnChanger(delta) {
 			if (changeSize == 0) {
 				fieldSize = fieldSize + delta;
-				if (delta > 0 && FS < fieldSize) { FS = fieldSize; }
+				if ((delta > 0 && FS < fieldSize) || FS > 17) { FS = fieldSize; }
 				saveValue("fieldSize", fieldSize);
 				saveValue("FS", FS);
 				writeMatrix();
@@ -1307,13 +1529,14 @@
 			let id = cellId("v", "01", "01");
 			if (changeSize == 0) {
 				gameOver = 0;
+				//document.getElementById("autoButton").innerHTML = '';
 				gameColorIndex = firstColorIndex;
 				document.getElementById(id).bgColor = index2Color(gameColorIndex);
 				let f = 0;
 				if (gameColorIndex == secondColorIndex) {
 					f = 1;
 				}
-				document.getElementById(id).innerHTML = `<font color=${index2Color(f)}>${document.getElementById(id).innerText}</font>`;
+				document.getElementById(id).innerHTML = `< font color = ${index2Color(f)}> ${document.getElementById(id).innerText}</font > `;
 				greenVar = 0;
 				roboSwitch = 0;
 				if (newLevel > 0) {
@@ -1334,7 +1557,7 @@
 			html.push('<TABLE border=0 cellSpacing=0 id="coordtabX">');
 			html.push('<TR>');
 			for (let x = 0; x < FS * 2 + 1; x++) {
-				html.push(`<TD style="width:${x % 2 == 1 ? 10 * linesWidth : 0}px; font-size: ${tableWidth / (6.0 * FS)}; height: "${linesWidth}px" align="center" valign="down">`);
+				html.push(`< TD style = "width:${x % 2 == 1 ? 10 * linesWidth : 0}px; font-size: ${tableWidth / (6.0 * FS)}; height: "${linesWidth}px" align="center" valign="down">`);
 				if (x % 2 == 1) { html.push(`${x / 2 + 0.5}`); }
 				html.push('</TD>');
 			}
@@ -1471,7 +1694,110 @@
 			}
 		} // Зазвичай викликається після кліка користувача: document.getElementById("exit-fullscreen-button").addEventListener("click", closeFullscreen);
 
+		function setScale(scaleValue) {
+			// scaleValue - це число (наприклад, 0.8 для 80%)
+			document.body.style.transform = `scale(${scaleValue})`;
 
+			// Важливо: вказуємо точку, від якої йде масштабування (верхній лівий кут)
+			document.body.style.transformOrigin = "0 0";
+
+			// Якщо ви зменшуєте сторінку, може знадобитися збільшити ширину body,
+			// щоб вона займала весь екран (оскільки scale не змінює фізичні розміри блоку)
+			document.body.style.width = `${100 / scaleValue}%`;
+		}
+
+		// ФУНКЦІЯ 1: Вмикаємо анімацію (викликати при Game Over)
+		function highlightStartButton() {
+			// Перевіряємо, чи це справді кнопка старту
+			if (btn.innerText === autoSymbol) {
+				btn.classList.add("highlight-btn");
+			}
+		}
+
+		// ФУНКЦІЯ 2: Вимикаємо анімацію (викликати при натисканні на кнопку)
+		function stopHighlight() {
+			btn.classList.remove("highlight-btn");
+		}
+		function showStartOverlay() {
+			const overlay = document.getElementById('startOverlay');
+			overlay.style.display = 'flex';
+			// Забороняємо взаємодію з полем
+			document.getElementById('tx-container').style.pointerEvents = 'none';
+		}
+		function hideStartOverlay() {
+			const overlay = document.getElementById('startOverlay');
+			overlay.style.display = 'none';
+			document.getElementById('tx-container').style.pointerEvents = '';
+		}
+		function startGame() {
+			hideStartOverlay();
+			fnAuto();
+		}
+		function showUpOverlay() {
+			const overlay = document.getElementById('upOverlay');
+			overlay.style.display = 'flex';
+			// Забороняємо взаємодію з полем
+			document.getElementById('tx-container').style.pointerEvents = 'none';
+			document.getElementById('upOverlayText').innerText = `▲\nlevel\n${gameLevel + 1}`;
+		}
+		function showDownOverlay() {
+			const overlay = document.getElementById('downOverlay');
+			overlay.style.display = 'flex';
+			// Забороняємо взаємодію з полем
+			document.getElementById('tx-container').style.pointerEvents = 'none';
+			document.getElementById('downOverlayText').innerText = `▼\nlevel\n${gameLevel - 1}`;
+		}
+		function showContinueOverlay() {
+			const overlay = document.getElementById('continueOverlay');
+			overlay.style.display = 'flex';
+			// Забороняємо взаємодію з полем
+			document.getElementById('tx-container').style.pointerEvents = 'none';
+			document.getElementById('continueOverlayText').innerText = `▶\nlevel\n${gameLevel}`;
+		}
+		function hideUpOverlay() {
+			const overlay = document.getElementById('upOverlay');
+			overlay.style.display = 'none';
+			document.getElementById('tx-container').style.pointerEvents = '';
+		}
+		function hideDownOverlay() {
+			const overlay = document.getElementById('downOverlay');
+			overlay.style.display = 'none';
+			document.getElementById('tx-container').style.pointerEvents = '';
+		}
+		function hideContinueOverlay() {
+			const overlay = document.getElementById('continueOverlay');
+			overlay.style.display = 'none';
+			document.getElementById('tx-container').style.pointerEvents = '';
+		}
+		function continueGame() {
+			hideUpOverlay();
+			hideDownOverlay();
+			hideContinueOverlay();
+			fnAuto(2);
+		}
+		function fnReload() {
+			if (menuMap != 0) {
+				menuMap = 0;
+				saveValue('darkMode', darkMode);
+				location.reload();
+			}
+		}
+
+		function fnMenu(i) {
+			menuMap = i;
+			if (i == 0) {
+				writeHtml(10);
+				//writeHtml(10);
+			} else {
+				writeHtml(10);
+			}
+		}
+
+		function fnManualDark() {
+			manualDarkMode = (manualDarkMode == 0) ? 1 : 0;
+			saveValue('manualDarkMode', manualDarkMode);
+			writeHtml(10);
+		}
 	</script>
 
 	<style>
@@ -1482,6 +1808,47 @@
 			padding: 0;
 			box-sizing: border-box;
 			font-size: 16px;
+			width: 100vw;
+			/* Ширина завжди дорівнює ширині вікна */
+			height: 100vh;
+			/* Висота завжди дорівнює висоті вікна */
+			/*overflow: hidden;*/
+			/* ЗАБОРОНЯЄМО вихід за межі (це вимкне масштабування) */
+			/* Забороняє горизонтальний скрол */
+			/*position: fixed;*/
+			/* Фіксуємо "папір" на місці */
+			position: static;
+			overscroll-behavior: auto;
+			/* Запобігає "проваленню" за межі екрану на мобільних */
+			overflow-y: auto;
+			/* Вмикає вертикальну прокрутку, коли контент не влазить */
+		}
+
+		html,
+		body,
+		.app-scroll-wrapper,
+		#uberTable,
+		#gameBoardDiv,
+		#tx-container,
+		#tx {
+			max-width: 100vw !important;
+			overflow-x: hidden !important;
+		}
+
+		/* 2. Створюємо зону, яка буде прокручуватися ВСЕРЕДИНІ каркасу */
+		.app-scroll-wrapper {
+			/*width: 100vw;*/
+			/*height: 100vh;*/
+			overflow-y: auto;
+			/* Вмикає вертикальну прокрутку, коли контент не влазить */
+			/*overflow-x: hidden;*/
+			/* Вмикає горизонтальну прокрутку, коли контент не влазить  */
+
+			/* Робить прокрутку плавною та інерційною (як у рідних додатках) */
+			-webkit-overflow-scrolling: touch;
+			/* для iOS */
+			overscroll-behavior: auto;
+			/* для Android/Chrome */
 		}
 
 		/* Скидання для заголовків */
@@ -1533,84 +1900,382 @@
 		#textingCell {
 			min-width: 100px;
 		}
+
+		#xoxpngf {
+			/* 1. Змушуємо елемент <img> зайняти весь простір комірки */
+			width: 100%;
+			height: 100%;
+
+			/* 2. Вписуємо картинку в ці розміри, зберігши пропорції */
+			object-fit: contain;
+
+			/* (Необов'язково) Прибирає зайві відступи, якщо вони є */
+			display: block;
+		}
+
+		#billSize,
+		#billSizeL,
+		#tx {
+			display: inline-block;
+			width: 100%;
+			white-space: nowrap;
+			overflow: hidden;
+			text-align: left;
+			transform-origin: left center;
+		}
+
+		#tx-container {
+			position: relative;
+			/*overflow: visible !important;*/
+			overflow: hidden !important;
+			width: auto;
+			height: auto;
+			min-width: 0;
+			min-height: 0;
+			padding: 0;
+			margin: 0;
+		}
+
+		#tx-container,
+		#tx {
+			max-width: none !important;
+			max-height: none !important;
+		}
+
+		#startOverlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+		}
+
+		/* Визначаємо анімацію збільшення */
+		@keyframes pulse-animation {
+			0% {
+				transform: scale(0.8);
+			}
+
+			50% {
+				transform: scale(6.3);
+				/*1.3*/
+			}
+
+			/* Збільшуємо на 30% */
+			100% {
+				transform: scale(0.8);
+			}
+		}
+
+		/* Клас, який ми будемо "навішувати" на кнопку */
+		.highlight-btn {
+			/* 1.5s - час одного циклу, infinite - повторювати вічно */
+			animation: pulse-animation 1.5s infinite ease-in-out;
+			/* !!! ОСЬ ЦЕЙ РЯДОК ОБОВ'ЯЗКОВИЙ !!! */
+			display: inline-block;
+			color: #00ff00;
+			/* Важливо: дозволяє кнопці "вистрибувати" поверх інших клітинок при збільшенні */
+			position: relative;
+			z-index: 100;
+		}
+
+		#startOverlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 128, 255, 0.85);
+			/* синя напівпрозора смуга */
+			z-index: 9999;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			pointer-events: auto;
+		}
+
+		#upOverlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(128, 255, 0, 0.85);
+			/* оранжева напівпрозора смуга */
+			z-index: 9999;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			pointer-events: auto;
+		}
+
+		#downOverlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 32, 64, 0.85);
+			/* синя напівпрозора смуга */
+			z-index: 9999;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			pointer-events: auto;
+		}
+
+		#continueOverlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 64, 128, 0.85);
+			/* синя напівпрозора смуга */
+			z-index: 9999;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			pointer-events: auto;
+		}
+
+		#startOverlayInner,
+		#upOverlayInner,
+		#downOverlayInner,
+		#continueOverlayInner {
+			text-align: center;
+			color: #fff;
+			font-size: 2em;
+			font-weight: bold;
+			background: rgba(0, 0, 0, 0.2);
+			padding: 40px 30px;
+			border-radius: 20px;
+			box-shadow: 0 0 20px #0008;
+		}
+
+		#startOverlayText,
+		#upOverlayText,
+		#downOverlayText,
+		#continueOverlayText {
+			display: block;
+			margin-bottom: 20px;
+			font-size: 2.5em;
+			letter-spacing: 0.2em;
+		}
+
+		#startOverlayBtn,
+		#upOverlayBtn,
+		#downOverlayBtn,
+		#continueOverlayBtn {
+			font-size: 2em;
+			padding: 0.5em 2em;
+			border: none;
+			border-radius: 10px;
+			background: #fff;
+			color: #0078ff;
+			font-weight: bold;
+			cursor: pointer;
+			box-shadow: 0 2px 8px #0004;
+			transition: background 0.2s, color 0.2s;
+		}
+
+		#startOverlayBtn:hover,
+		#upOverlayBtn:hover,
+		#downOverlayBtn:hover,
+		#continueOverlayBtn:hover {
+			background: #0078ff;
+			color: #fff;
+		}
+
+		@media (orientation: portrait) {
+			#footer {
+				position: fixed;
+				left: 0;
+				bottom: 0;
+				/*width: 90%;*/
+				z-index: 1000;
+				align-content: center;
+				/*background: #00ff00;*/
+				/* Додайте інші стилі за потреби */
+			}
+
+			/* Щоб контент не перекривався footer'ом */
+			.app-scroll-wrapper {
+				padding-bottom: 100px;
+				/* або більше, якщо footer вищий */
+			}
+		}
 	</style>
 	<!-- Insert HTML here -->
-	<div id="gameNameP"></div>
-	<table border="0" cellSpacing="0" cellPadding="0" id="uberTable">
-		<tr>
-			<td align="left" valign="top">
-				<div id="gameBoardDiv">
-					<table border="0" cellSpacing="0" cellPadding="0">
+	<div class="app-scroll-wrapper">
+		<div id="gameNameP"></div>
+		<table border="0" cellSpacing="0" cellPadding="0" id="uberTable">
+			<tr id="topRow">
+				<td align="left" valign="top" id="leftCell">
+					<div id="gameBoardDiv">
+						<table border="0" cellSpacing="0" cellPadding="0" id="gameTable">
+							<tr>
+								<td></td>
+								<td id="coordXcon" align="left" valign="top">
+								</td>
+							</tr>
+							<tr>
+								<td id="coordYcon" align="left" valign="top">
+								</td>
+								<td align="left" valign="top">
+									<div id="tx-container" style="position: relative; min-height: 10px;">
+										<div id="tx"></div><!-- Game Board Container -->
+									</div>
+									<div id="startOverlay" style="display:none;">
+										<div id="startOverlayInner">
+											<span id="startOverlayText">START</span>
+											<button id="startOverlayBtn" onclick="startGame()">▶</button>
+										</div>
+									</div>
+									<div id="upOverlay" style="display:none;">
+										<div id="upOverlayInner">
+											<span id="upOverlayText">UP</span>
+											<button id="upOverlayBtn" onclick="continueGame()">▶</button>
+										</div>
+									</div>
+									<div id="downOverlay" style="display:none;">
+										<div id="downOverlayInner">
+											<span id="downOverlayText">DOWN</span>
+											<button id="downOverlayBtn" onclick="continueGame()">▶</button>
+										</div>
+									</div>
+									<div id="continueOverlay" style="display:none;">
+										<div id="continueOverlayInner">
+											<span id="continueOverlayText">CONTINUE</span>
+											<button id="continueOverlayBtn" onclick="continueGame()">▶</button>
+										</div>
+									</div>
+									<div id="bannerP"></div>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</td>
+				<td align="left" valign="top">
+					<div id="gameNameL"></div>
+					<div id="dyL"></div>
+					<small>
+						<div id="statL"></div>
+					</small>
+					<span id="billSizeL"></span>
+					<div id="bannerL">
+						<!--<script>document.write(atob("PHNjcmlwdCB0eXBlPSJ0ZXh0L2phdmFzY3JpcHQiPgoJYXRPcHRpb25zID0gewoJCSdrZXknIDogJzJkMzJiZWEwMWQzZmY3MThhYWNjNzk1ZDE1Y2U3OWEzJywKCQknZm9ybWF0JyA6ICdpZnJhbWUnLAoJCSdoZWlnaHQnIDogNjAsCgkJJ3dpZHRoJyA6IDQ2OCwKCQkncGFyYW1zJyA6IHt9Cgl9Owo8L3NjcmlwdD4KPHNjcmlwdCB0eXBlPSJ0ZXh0L2phdmFzY3JpcHQiIHNyYz0iLy9hbm5veWluZ25pZ2h0bWFyZWVkaXQuY29tLzJkMzJiZWEwMWQzZmY3MThhYWNjNzk1ZDE1Y2U3OWEzL2ludm9rZS5qcyI+PC9zY3JpcHQ+"));</script>-->
+						<script
+							type="text/javascript"> atOptions = { 'key': '2d32bea01d3ff718aacc795d15ce79a3', 'format': 'iframe', 'height': 60, 'width': 468, 'params': {} }; </script>
+						<script type="text/javascript"
+							src="//www.highperformanceformat.com/2d32bea01d3ff718aacc795d15ce79a3/invoke.js"></script>
+					</div>
+					<table>
 						<tr>
-							<td></td>
-							<td id="coordXcon" align="left" valign="top">
+							<td valign="top">
+								<div id="ntL"></div>
 							</td>
-						</tr>
-						<tr>
-							<td id="coordYcon" align="left" valign="top">
-							</td>
-							<td align="left" valign="top">
-								<div id="tx-container" style="position: relative; min-height: 10px;">
-									<div id="tx"></div><!-- Game Board Container -->
-								</div>
-								<div id="bannerP">
-									<script
-										type="text/javascript"> atOptions = { 'key': '2d32bea01d3ff718aacc795d15ce79a3', 'format': 'iframe', 'height': 60, 'width': 468, 'params': {} }; </script>
-									<script type="text/javascript"
-										src="//www.highperformanceformat.com/2d32bea01d3ff718aacc795d15ce79a3/invoke.js"></script>
-								</div>
+							<td valign="top">
+								<div id="textingL"></div>
 							</td>
 						</tr>
 					</table>
-				</div>
-			</td>
-			<td align="left" valign="top">
-				<div id="gameNameL"></div>
-				<div id="dyL"></div>
-				<small>
-					<div id="statL"></div>
-				</small>
-				<div id="bannerL">
-					<script
-						type="text/javascript"> atOptions = { 'key': '2d32bea01d3ff718aacc795d15ce79a3', 'format': 'iframe', 'height': 60, 'width': 468, 'params': {} }; </script>
-					<script type="text/javascript"
-						src="//www.highperformanceformat.com/2d32bea01d3ff718aacc795d15ce79a3/invoke.js"></script>
-				</div>
-				<table>
-					<tr>
-						<td valign="top">
-							<div id="ntL"></div>
-						</td>
-						<td valign="top">
-							<div id="textingL"></div>
-						</td>
-					</tr>
-				</table>
-			</td>
-		</tr>
-		<tr>
-			<td align="left" valign="top">
-				<div id="dy"></div>
-				<small>
-					<div id="stat"></div>
-				</small>
-				<table>
-					<tr>
-						<td valign="top">
-							<div id="nt"></div>
-						</td>
-						<td valign="top">
-							<div id="texting"></div>
-						</td>
-					</tr>
-				</table>
-			</td>
-			<td align="left" valign="top">
-				<div id="nullDiv"></div>
-			</td>
-		</tr>
-	</table>
-	<!--<INPUT type="text" ID=redCell value="">-->
+				</td>
+			</tr>
+			<tr>
+				<td align="left" valign="top">
+					<div id="dy"></div>
+					<small>
+						<div id="stat"></div>
+					</small>
+					<span id="billSize"></span>
+					<div id="bannerDown">
+						<table id="tableDown">
+							<tr>
+								<td id="bannerDownContainer">
+									<script type="text/javascript">
+										atOptions = {
+											'key': '73ef31f4bf66e011563a79e2cdfe2b0d',
+											'format': 'iframe',
+											'height': 250,
+											'width': 300,
+											'params': {}
+										};
+									</script>
+									<script type="text/javascript"
+										src="//annoyingnightmareedit.com/73ef31f4bf66e011563a79e2cdfe2b0d/invoke.js">
+										</script>
+									<!--<script type="text/javascript">
+										if (typeof atAsyncOptions !== 'object') var atAsyncOptions = [];
+										atAsyncOptions.push({
+											key: '73ef31f4bf66e011563a79e2cdfe2b0d',
+											format: 'js',
+											async: true,
+											container: 'atContainer-73ef31f4bf66e011563a79e2cdfe2b0d',
+											params: {},
+										});
+										var script = document.createElement('script');
+										script.type = 'text/javascript';
+										script.async = true;
+										script.src =
+											'http' +
+											(location.protocol === 'https:' ? 's' : '') +
+											'://annoyingnightmareedit.com/73ef31f4bf66e011563a79e2cdfe2b0d/invoke.js';
+										document.getElementsByTagName('head')[0].appendChild(script);
+									</script>
+
+									<div id="atContainer-73ef31f4bf66e011563a79e2cdfe2b0d"></div>-->
+								</td>
+								<th valign="top" id="bigLevelContainer">
+									<span id="bigLevel">0</span>
+								</th>
+							</tr>
+						</table>
+					</div>
+					<table id="tableTexting">
+						<tr>
+							<td valign="top">
+								<div id="nt"></div>
+							</td>
+							<td valign="top">
+								<div id="texting"></div>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<!--<td align="left" valign="top">
+					<div id="nullDiv"></div>
+				</td>--->
+			</tr>
+			<tr id="footer" style="height:100px;">
+				<td>
+					<table style="width:100vw;">
+						<tr>
+							<td style="text-align:center;" onclick="fnReload();"><!--Game-->
+								<span id="menu0" class="material-symbols-outlined">widget_small</span><br>Game
+							</td>
+							<td style="text-align:center;" onclick="fnMenu(4);"><!--Settings-->
+								<span id="menu4" class="material-symbols-outlined">settings</span><br>Settings
+							</td>
+							<td style="text-align:center;"><!--Share-->
+								<span id="menu3" class="material-symbols-outlined">share</span><br>Share
+							</td>
+							<td style="text-align:center;" onclick="resetGame();"><!--Delete-->
+								<span id="menu2" class="material-symbols-outlined">delete</span><br>Delete
+							</td>
+							<td style="text-align:center;" onclick="fnMenu(1);"><!--Info-->
+								<span id="menu1" class="material-symbols-outlined">data_info_alert</span><br>Info
+							</td>
+
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!--<button onclick="highlightStartButton()">Reload game</button>-->
+		<div id="footerDiv"></div>
+		<!--<INPUT type="text" ID=redCell value="">-->
+	</div>
 </BODY>
 
 </HTML>
